@@ -2,6 +2,8 @@
 import numpy as np
 from PIL import Image
 
+# TO DO: Center Images
+
 #coordinates = [(1, 0), (2, 1), (3, 2), (4,3), (1,3), (0,3), (3,4), (2,4)]
 
 def make_image_from_coords (coordinates, name):
@@ -16,6 +18,10 @@ def make_image_from_coords (coordinates, name):
 
 	im = Image.fromarray(image.astype('uint8')*255)
 
+	# save as binary array text file
+	np.savetxt('lao_text/' + name + '.txt', image, fmt='%d')
+
+	# save as bitmap image
 	im.save('lao_images/' + name + '.bmp')
 
 def print_pixels_in_image (image, max_x, max_y):
@@ -67,7 +73,7 @@ def extract_coordinates_from_file(filename):
 	return coordinates_list
 
 def make_images_from_file(filename):
-	file_token = filename.split('/')[2].split('.')[0]
+	file_token = filename.split('/')[-1].split('.')[0]
 	coordinate_list = extract_coordinates_from_file(filename)
 	item = 0
 	for lst in coordinate_list:
