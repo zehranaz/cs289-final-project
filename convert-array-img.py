@@ -27,25 +27,47 @@ def print_pixels_in_image (image, max_x, max_y):
 def extract_coordinates_from_file(filename):
 	f = open(filename, 'r')
 	line_num = 0
+	# for each person
 	coordinates_list = []
+	# one for each character
 	coordinates = []
+	# interpolate in cases where x-coords or 
+	#	y-coords differ from prev by this threshold
+	dist_to_interpolate = 2
+	prev_x = None
+	prev_y = None
 	for line in f:
 		line_num += 1
+		# skip first ten lines
 		if line_num < 10:
 			continue
 		tokens = line.split(" ")
 		if len(tokens) == 3:
-			coordinates.append((int(tokens[1]), int(tokens[2])))
+			new_x = int(tokens[1])
+			new_y = int(tokens[2])
+			if prev_x and prev_y:
+				# interpolate if separated from prev x or y coord
+				if abs(new_x - prev_x) == dist_to_interpolate or \
+					abs(new_y - prev_y) == dist_to_interpolate:
+					mid_x = prev_x + int(round((new_x - prev_x)/2))
+					mid_y = prev_y + int(round((new_y - prev_y)/2))
+					coordinates.append((mid_x, mid_y))
+			coordinates.append((new_x, new_y))
+			prev_x, prev_y = new_x, new_y
+
+		# reached end of character line
 		if len(tokens) == 1:
-			if not len(coordinates) == 0:
+			if len(coordinates) > 0:
 				coordinates_list.append(coordinates)
 				coordinates = []
+
+	# last character's coordinates			
 	if not len(coordinates) == 0:
 		coordinates_list.append(coordinates)
 	return coordinates_list
 
 def make_images_from_file(filename):
-	file_token = filename.split('/')[6].split('.')[0]
+	file_token = filename.split('/')[2].split('.')[0]
 	coordinate_list = extract_coordinates_from_file(filename)
 	item = 0
 	for lst in coordinate_list:
@@ -53,9 +75,13 @@ def make_images_from_file(filename):
 		item += 1
 
 def convert (): 
-	for i in range(1, 9):
-	 	make_images_from_file("/home/zehranaz/genetic/Distribution/Data/000" + str(i) + ".txt")
+	# test case
+	# print extract_coordinates_from_file("Distribution/Tests/interpolate_test.txt")
+	for i in range(1, 2):
+	 	make_images_from_file("Distribution/Data/000" + str(i) + ".txt")
+	"""
 	for i in range(10, 52):
-		make_images_from_file("/home/zehranaz/genetic/Distribution/Data/00" + str(i) + ".txt")
+		make_images_from_file("Distribution/Data/00" + str(i) + ".txt")
+	"""
 
-#convert()
+convert()
