@@ -1,12 +1,8 @@
-# Converty array of coordinates into pictures.
+# Convert list of coordinates into pictures.
 import numpy as np
 import PIL
 from PIL import Image
 import math
-
-# TO DO: Center Images
-
-#coordinates = [(1, 0), (2, 1), (3, 2), (4,3), (1,3), (0,3), (3,4), (2,4)]
 
 def make_image_from_coords (coordinates, name):
 	x, y = [i[0] for i in coordinates], [i[1] for i in coordinates]
@@ -102,40 +98,51 @@ def convert(fname, person_lst, char_lst):
 	"""
 
 # scales a picture to fit a fixed height and width, maintaining aspect ratio
-def fit_to_size(fname, sizex, sizey):
+def fit_to_size(fname, basewidth, baseheight):
 	# Rescale so width = sizex (keep aspect ratio)
-	basewidth = sizex
 	old_im = Image.open(fname) 
 	wpercent = (basewidth/float(old_im.size[0])) 
 	# we want the highest predicted hsize
 	hsize = int((float(old_im.size[1])*float(wpercent))) 
 	new_im = old_im.resize((basewidth,hsize), PIL.Image.ANTIALIAS) 
-	old_im.show()
-	new_im.show()
 
 	# Add margins so image is at fixed height and width
 	old_im = new_im
 	old_size = old_im.size 
-	new_size = (sizex, sizey) # new image size is exactly 800 x 800, centered
+	new_size = (basewidth, baseheight) # new image size is exactly 800 x 800, centered
 	new_im = Image.new("RGB", new_size) ## luckily, this is already black! 
-	new_im.paste(old_im, ((new_size[0]-old_size[0])/2, (new_size[1]-old_size[1])/2)) 
-	new_im.show() # new_im.save('someimage.jpg')
-	
+	new_im.paste(old_im, ((new_size[0]-old_size[0])/2, (new_size[1]-old_size[1])/2))
+	new_im.save(fname)
 
-img_sizes = convert("Distribution/Data/", [1, 2], [11, 12])
-"""
-x, y = [i[0] for i in img_sizes], [i[1] for i in img_sizes]
-basewidth = max(x) # minimum basewidth
-print basewidth
-multipliers_lst = map(lambda x: basewidth/float(x), x)
-height_lst = [mult*height for mult, height in zip(multipliers_lst, y)]
-baseheight = int(math.ceil(max(height_lst)))
-print height_lst.index(max(height_lst))
-print baseheight
+def main():
+	""" for Tamil characters dataset
+    # convert tiff file to binary array
+    im = plt.imread(tiff_file) # converts to type numpy.ndarray
+    nrow = im.shape[0]
+    ncol = im.shape[1]
+    binim = np.zeros((nrow, ncol)) # 2D binary array
+    for row in range(nrow):
+        for col in range(ncol):
+            # 1 if black, 0 if white
+            binim[row][col] = 1 if 0 in im[row][col] else 0
+    """
+	# pick the people and character indices that you want to convert
+	person_lst = [1, 2] # works for persons 0-9
+	char_lst = [1, 11, 12]
+	img_sizes = convert("Distribution/Data/", person_lst, char_lst)
 
+	# determine the width and height each image should be scaled to
+	x, y = [i[0] for i in img_sizes], [i[1] for i in img_sizes]
+	basewidth = max(x) # minimum basewidth
+	multipliers_lst = map(lambda x: basewidth/float(x), x)
+	height_lst = [mult*height for mult, height in zip(multipliers_lst, y)]
+	baseheight = int(math.ceil(max(height_lst)))
 
-char_index = 11
-for person_index in range(1, 2):
-    filename = "lao_images/000" + str(person_index) + "_" + str(char_index) + ".bmp"
-    fit_to_size(filename, basewidth, baseheight)
-"""
+	# scale each image
+	for person_index in person_lst:
+		for char_index in char_lst:
+			filename = "lao_images/000" + str(person_index) + "_" + str(char_index) + ".bmp"
+			fit_to_size(filename, basewidth, baseheight)
+
+if __name__ == "__main__":
+    main()
