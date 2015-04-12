@@ -34,23 +34,15 @@ def tests():
 
 
 def main():
-    """ for Tamil characters dataset
-    # convert tiff file to binary array
-    im = plt.imread(tiff_file) # converts to type numpy.ndarray
-    nrow = im.shape[0]
-    ncol = im.shape[1]
-    binim = np.zeros((nrow, ncol)) # 2D binary array
-    for row in range(nrow):
-        for col in range(ncol):
-            # 1 if black, 0 if white
-            binim[row][col] = 1 if 0 in im[row][col] else 0
-    """
     graph = Graph()
     tests()
 
-    # thin binary array to unit thickness
-
+    char_index = 11
+    for person_index in range(1, 2):
+        filename = "lao_images/000" + str(person_index) + "_" + char_index + ".bmp"
+        
     # walk through every row in 2D array until see something black
+
 
 if __name__ == "__main__":
     main()
