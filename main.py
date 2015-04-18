@@ -29,8 +29,7 @@ def tests():
     e2 = Edge(v1, v3, v3.EuclidDist(v1), True)
     graph.addEdge(e2)
     print("Real Print starts here ")
-    graph.print_adjmatrix()
-    graph.print_vertexlst()
+    graph.print_graph()
 
 
 def main():
@@ -39,7 +38,7 @@ def main():
 
     char_index = 11
     for person_index in range(1, 2):
-        filename = "lao_images/000" + str(person_index) + "_" + char_index + ".bmp"
+        filename = "lao_images/000" + str(person_index) + "_" + str(char_index) + ".bmp"
         
     # walk through every row in 2D array until see something black
 

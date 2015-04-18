@@ -1,5 +1,4 @@
 import math
-import matplotlib.pyplot as plt 
 import numpy as np
 import __builtin__
 
@@ -91,6 +90,10 @@ class Graph:
         for elt in self.vertexlst:
             print elt.print_out()
         print 
+    def print_graph (self):
+        print "Graph"
+        self.print_vertexlst()
+        self.print_adjmatrix()
 
         
     
