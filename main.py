@@ -1,5 +1,30 @@
 from classes import Graph, Edge, Vertex
 import matplotlib.pyplot as plt
+import numpy as np
+
+def unit_vector(vector):
+    """ Returns the unit vector of the vector.  """
+    return vector / np.linalg.norm(vector)
+
+def angle_between(v1, v2):
+    """ Returns the angle in radians between vectors 'v1' and 'v2'::
+
+            >>> angle_between((1, 0, 0), (0, 1, 0))
+            1.5707963267948966
+            >>> angle_between((1, 0, 0), (1, 0, 0))
+            0.0
+            >>> angle_between((1, 0, 0), (-1, 0, 0))
+            3.141592653589793
+    """
+    v1_u = unit_vector(v1)
+    v2_u = unit_vector(v2)
+    angle = np.arccos(np.dot(v1_u, v2_u))
+    if np.isnan(angle):
+        if (v1_u == v2_u).all():
+            return 0.0
+        else:
+            return np.pi
+    return (angle / np.pi) * 180.
 
 def tests():
     v1 = Vertex(2,3)
@@ -50,33 +75,38 @@ def find_start(im, nrow, ncol):
     return [currentrow, currentcol]
 
 # return coordinates of next pixel to go to in neighborhood
-def check_neighborhood(im, nrow, ncol, currentrow, currentcol, r, prev_visited):
+def check_neighborhood(im, nrow, ncol, currentrow, currentcol, r, prev_vector, prev_visited):
     # figure out range of indices to check in neighborhood
     row_start = max(currentrow-r, 0)
     row_end = min(currentrow+r, nrow-1)
     col_start = max(currentcol-r, 0)
     col_end = min(currentcol+r, ncol-1)
 
-    # find index of neighbor with highest sum RGB
+    # find nonzero neighbor with least deviation from previous direction
     row_min, col_min = None, None
-    max_val = 0
+    min_angle = 360.
     for rowi in range(row_start, row_end+1):
         for coli in range(col_start, col_end+1):
+            # if not the current pixel
             if not (rowi == currentrow and coli == currentcol):
+                # if not a previously visited pixel
                 if (rowi, coli) not in prev_visited:
-                    print rowi, coli, im[rowi][coli]
-                    rowsum = sum(im[rowi][coli])
-                    if rowsum >= max_val:
-                        max_val = rowsum
-                        row_min = rowi
-                        col_min = coli
-    print 'maxval', max_val, row_min, col_min
+                    # if not black
+                    if not im[rowi][coli].all() == 0:
+                        curr_vector = [rowi - currentrow, coli - currentcol]
+                        angle = angle_between(prev_vector, curr_vector)
+                        if angle < min_angle:
+                            min_angle = angle
+                            row_min = rowi
+                            col_min = coli
+
+    print 'min_angle', min_angle, row_min, col_min
     prev_visited.add((row_min, col_min))
-    return row_min, col_min
+    start_new_vertex = min_angle > 0.1
+    return row_min, col_min, start_new_vertex
 
 def main():
-    graph = Graph()
-    tests()
+
     char_index = 11
     for person_index in range(1, 2):
         filename = "lao_images/000" + str(person_index) + "_" + str(char_index) + ".bmp"
@@ -84,17 +114,44 @@ def main():
     # read image as 2D numpy array
     im = plt.imread(filename)
     nrow, ncol = im.shape[0], im.shape[1]
+
+    # initiate graph
+    graph = Graph()
+
     # find starting pixel (first nonzero pixel)
     currentrow, currentcol = find_start(im, nrow, ncol)
+    prev_vertex = Vertex(currentrow, currentcol)
+    graph.addVertex(prev_vertex)
 
     r = 1 # radius around current pixel to be checked
     prev_visited = set()
     prev_visited.add((currentrow, currentcol))
-    numiter = 10
-    for i in range(numiter):
-        currentrow, currentcol = check_neighborhood(im, nrow, ncol, currentrow, \
-                                                        currentcol, r, prev_visited)
-        print prev_visited
+    prev_row = currentrow
+    prev_col = currentcol
+    numiter = 50
+    prev_vector = [1,0] # unit vector for previous direction
+    for i in range(numiter): # TODO: figure out terminating condition
+        currentrow, currentcol, start_new_vertex = check_neighborhood(im, nrow, ncol, currentrow, \
+                                                        currentcol, r, prev_vector, prev_visited)
+        if start_new_vertex:
+            new_vertex = Vertex(currentrow, currentcol)
+            # create an edge between this and previous vertex
+            dist = new_vertex.EuclidDist(prev_vertex)
+            e = Edge(prev_vertex, new_vertex, dist, False)
+            graph.addVertex(new_vertex)
+            graph.addEdge(e)
+            prev_vertex = new_vertex
+        prev_vector = [currentrow - prev_row, currentcol - prev_col]
+        prev_row = currentrow
+        prev_col = currentcol
+
+    # make the last point a vertex and add it to graph
+    new_vertex = Vertex(currentrow, currentcol)
+    dist = new_vertex.EuclidDist(prev_vertex)
+    e = Edge(prev_vertex, new_vertex, dist, False)
+    graph.addVertex(new_vertex)
+    graph.addEdge(e)
+    graph.print_graph()
 
 
 if __name__ == "__main__":
