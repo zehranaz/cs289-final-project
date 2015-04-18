@@ -1,4 +1,5 @@
-from classes import Graph, Edge, Vertex
+from classes import Graph, Edge, Vertex, MatchPoints
+from random import randint
 
 def tests():
     v1 = Vertex(2,3)
@@ -31,10 +32,33 @@ def tests():
     print("Real Print starts here ")
     graph.print_graph()
 
+def makeTestGraph():
+    graph = Graph()
+    # Pixels always between 33 x 48
+    for i in range(5):
+        v = Vertex(int(randint(0,33)), int(randint(0,48)))
+        graph.addVertex(v)
+    return graph
+
+
+def testMatch():
+    g1 = makeTestGraph()
+    g2 = makeTestGraph()
+    print "Graph 1:"
+    g1.print_vertexlst()
+
+    print "Graph 2:"
+    g2.print_vertexlst()
+    
+    matches = MatchPoints(g1, g2, threshold = 4)
+    print matches
+    for v1,v2 in matches:
+        print "(", v1.print_out(), v2.print_out(), ")",
 
 def main():
     graph = Graph()
-    tests()
+    #tests()
+    testMatch()
 
     char_index = 11
     for person_index in range(1, 2):
