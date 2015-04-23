@@ -1,4 +1,4 @@
-from classes import Graph, Edge, Vertex, MatchPoints
+from classes import Graph, Edge, Vertex, MatchPoints, GenerateNewLetter
 from random import randint
 import matplotlib.pyplot as plt
 import numpy as np
@@ -58,10 +58,13 @@ def tests():
     print("Real Print starts here ")
     graph.print_graph()
 
-def makeTestGraph():
+# returns graph with numPoints vertexes; random number of vertexes if None specified
+def makeTestGraph(numPoints=None):
     graph = Graph()
     # Pixels always between 33 x 48
-    for i in range(5):
+    if not numPoints:
+        numPoints = randint(5,10)
+    for i in range(numPoints):
         v = Vertex(int(randint(0,33)), int(randint(0,48)))
         graph.addVertex(v)
     return graph
@@ -80,6 +83,16 @@ def testMatch():
     print matches
     for v1,v2 in matches:
         print "(", v1.print_out(), v2.print_out(), ")",
+    return matches
+
+def testMating():
+    matches = testMatch()
+    newGraph = GenerateNewLetter(matches)
+    newGraph.print_vertexlst()
+
+
+def main() :
+    testMating()
 
 
 # walk through image diagonally until see something black
@@ -130,7 +143,7 @@ def check_neighborhood(im, nrow, ncol, currentrow, currentcol, r, prev_vector, p
     start_new_vertex = min_angle > 0.1
     return row_min, col_min, start_new_vertex
 
-def main():
+def main_victoria():
 
     char_index = 11
     for person_index in range(1, 2):
