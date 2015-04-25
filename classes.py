@@ -77,7 +77,7 @@ class Graph:
     def getNeighborVertexes(self, vertex):
         neighbors = []
 
-        vIndex = getIndexOfVertex(vertex)
+        vIndex = self.getIndexOfVertex(vertex)
         if not vIndex:
             return []
 
@@ -105,7 +105,7 @@ class Graph:
             new_empty_row = [None for x in range(len(self.vertexlst))]
             self.adjmatrix.append(new_empty_row)  # add a new row 
                     
-        print "Dim of matrix after " + str(len(self.adjmatrix)) + " " + str(len(self.adjmatrix[0]))
+        #print "Dim of matrix after " + str(len(self.adjmatrix)) + " " + str(len(self.adjmatrix[0]))
         
     # find the index of each vertex in the vertex list and use it to locate it in the adj matrix   
     def addEdge(self, edge):
@@ -175,23 +175,27 @@ def GenerateNewLetter(g1, g2, matches) :
         newVertex = v1.avgVertex(v2)
         newGraph.addVertex(newVertex)
     # Generate average edges
-    for 
     return newGraph
         
     
+# TODO: Needs optimization from dynamic programming storage (can store if there is a path in an adj matrix and lay out the paths there)
+# TODO: test this!!
 # Find path between a pair of vertexes i and j of len length    
-def findPaths(iVertex, jVertex, len, graph, path):
-    if len == 0:
-        if jVertex in graph.getEdges(iVertex):
-            return path.append(iVertex)
+def findPaths(iVertex, jVertex, length, graph, path):
+    if length == 0:
+        if jVertex in graph.getNeighborVertexes(iVertex):
+            path.append(iVertex)
+            return path
         else:
-            return None
+            return []
     else:
         jNeighbors = graph.getNeighborVertexes(jVertex)
         for k in jNeighbors:
-            pathFound = findPaths(iVertex, k, len-1, graph, path):
-            if pathFound:
-                return pathFound.append(k)
+            pathFound = findPaths(iVertex, k, length-1, graph, path)
+            if pathFound and not k in path:
+                 pathFound.append(k)
+                 return pathFound
+        return []
 
 
 def generateCrossover(g1, g2):

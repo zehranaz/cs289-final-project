@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-from classes import Graph, Edge, Vertex, MatchPoints, GenerateNewLetter
+from classes import Graph, Edge, Vertex, MatchPoints, GenerateNewLetter, findPaths
 from random import randint
 import matplotlib.pyplot as plt
 import numpy as np
-import cv2
+
 
 def unit_vector(vector):
     """ Returns the unit vector of the vector.  """
@@ -89,6 +89,32 @@ def testMatch(g1=None, g2=None):
         print "(", v1.print_out(), v2.print_out(), ")",
     return matches
 
+def testFindPaths():
+    # Set up graph
+    graph = Graph()
+
+    v1 = Vertex(2,3)
+    graph.addVertex(v1)
+
+    v2 = Vertex(0,0)
+    graph.addVertex(v2)
+    
+    dist = v1.EuclidDist(v2)
+    e = Edge(v1, v2, dist, False)
+    graph.addEdge(e)
+
+    v3 = Vertex(4,5)
+    graph.addVertex(v3)
+    
+    e2 = Edge(v1, v3, v3.EuclidDist(v1), True)
+    graph.addEdge(e2)
+
+    path = []
+    findPaths(v2, v3, 1, graph, path)
+    for v in path:
+        print v.print_out()
+
+
 def testMating():
     g1 = makeTestGraph()
     g2 = makeTestGraph()
@@ -98,7 +124,7 @@ def testMating():
 
 
 def main() :
-    testMating()
+    testFindPaths()
 
 
 # walk through image diagonally until see something black
