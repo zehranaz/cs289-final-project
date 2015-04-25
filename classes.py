@@ -123,11 +123,6 @@ class Graph:
     def addEdge(self, edge):
         start_ind = self.vertexlst.index(edge.get_startv())
         end_ind = self.vertexlst.index(edge.get_endv())
-        # print start_ind
-        # print end_ind
-        # print "Matrix dim are: "
-        # print len(self.adjmatrix)
-        # print len(self.adjmatrix[0])
 
         # find index of start and end vertexes in vertex list, add edge both ways
         start_i = self.vertexlst.index(edge.get_startv())   
@@ -178,18 +173,7 @@ def MatchPoints(g1, g2, threshold):
         closestVertex = None
         minDist = sys.maxint
     return matches
-
-# Given graphs of letters and a list of matched points, generates an "evolved" (averaged) graph
-def GenerateNewLetter(g1, g2, matches) :
-    newGraph = Graph()
-    # Generate average vertexes
-    for v1, v2 in matches:
-        newVertex = v1.avgVertex(v2)
-        newGraph.addVertex(newVertex)
-    # Generate average edges
-    return newGraph
         
-    
 # TODO: Needs optimization from dynamic programming storage (can store if there is a path in an adj matrix and lay out the paths there)
 # TODO: test this!!
 # Find path between a pair of vertexes i and j of len length    
@@ -209,8 +193,36 @@ def findPaths(iVertex, jVertex, length, graph, path):
                  return pathFound
         return []
 
+# Given a graph, finds all paths in it up to length_limit length
+def findAllPaths(graph, length_limit=4):
+    vertexList = graph.getVertexes()
+    numVertexes = len(vertexList)
+    pathsFound = []
 
-def generateCrossover(g1, g2):
+    for length in range(length_limit + 1):
+        for v1 in range(numVertexes):
+            for v2 in range(v1 + 1, numVertexes):
+                pathsFound.append(findPaths(vertexList[v1], vertexList[v2], length, graph, []))
+    return pathsFound
+
+# Given graphs of letters, generates an "evolved" (averaged) graph
+def CrossOver(g1, g2):
     matches = MatchPoints(g1, g2)
-    adj1 = g1.getAdjMatrix()
-    adj2 = g2.getAdjMatrix()
+    newGraph = Graph()
+    
+    # Generate average vertexes
+    for v1, v2 in matches:
+        newVertex = v1.avgVertex(v2)
+        newGraph.addVertex(newVertex)
+    
+    # Generate average edges
+    paths1 = findAllPaths(g1)
+    paths2 = findAllPaths(g2)
+
+    # lay out all edges as in g1
+    # get common paths btw the 2: v1, v2 -> match[v1], match[v2]
+    # replace common ones on random 50% chance of replacement based on how many common paths found
+    
+
+    return newGraph
+

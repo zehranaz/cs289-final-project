@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from classes import Graph, Edge, Vertex, MatchPoints, GenerateNewLetter, findPaths
+from classes import Graph, Edge, Vertex, MatchPoints, findPaths
 from random import randint
 import matplotlib.pyplot as plt
 import numpy as np
@@ -110,8 +110,20 @@ def testFindPaths():
     e2 = Edge(v1, v3, v3.EuclidDist(v1), True)
     graph.addEdge(e2)
 
+    v4 = Vertex(10,20)
+    graph.addVertex(v4)
+
+    e3 = Edge(v3, v4, v3.EuclidDist(v4), False)
+    graph.addEdge(e3)
+
     path = []
     findPaths(v2, v3, 1, graph, path)
+    for v in path:
+        print v.print_out()
+
+    print "New one: "
+    path = []
+    findPaths(v2, v4, 2, graph, path)
     for v in path:
         print v.print_out()
 
@@ -329,4 +341,4 @@ def main_victoria():
 
 
 if __name__ == "__main__":
-    main_victoria()
+    main()
