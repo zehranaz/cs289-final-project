@@ -7,9 +7,6 @@ import numpy as np
 import cv2
 import thinning
 import coords_to_img
-=======
-
->>>>>>> a78e0ef1cd45a67bf91a8fb5405559482a20465d
 
 def unit_vector(vector):
     """ Returns the unit vector of the vector.  """
