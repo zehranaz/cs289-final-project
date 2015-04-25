@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #!/usr/bin/env python
 from classes import Graph, Edge, Vertex, MatchPoints, GenerateNewLetter
 from random import randint
