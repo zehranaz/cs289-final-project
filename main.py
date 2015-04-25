@@ -70,9 +70,11 @@ def makeTestGraph(numPoints=None):
     return graph
 
 
-def testMatch():
-    g1 = makeTestGraph()
-    g2 = makeTestGraph()
+def testMatch(g1=None, g2=None):
+    if g1 == None:
+        g1 = makeTestGraph()
+    if g2 == None:  
+        g2 = makeTestGraph()
     print "Graph 1:"
     g1.print_vertexlst()
 
@@ -86,8 +88,10 @@ def testMatch():
     return matches
 
 def testMating():
-    matches = testMatch()
-    newGraph = GenerateNewLetter(matches)
+    g1 = makeTestGraph()
+    g2 = makeTestGraph()
+    matches = testMatch(g1, g2)
+    newGraph = GenerateNewLetter(g1, g2, matches)
     newGraph.print_vertexlst()
 
 

@@ -49,6 +49,46 @@ class Graph:
     def getAdjMatrix (self):
         return self.adjmatrix
 
+    # Given a vertex, get its edges
+    def getEdges (self, vertex):
+        edges = []
+        
+        vIndex = getIndexOfVertex(vertex)
+        if not vIndex:
+            return []
+
+        # Traverse appropriate row in matrix to find all edges of this vertex
+        for i in range(len(self.adjmatrix [vIndex])):
+            edge = self.adjmatrix[vIndex][i]
+            if edge:
+                edges.append(edge)
+        return edges
+
+    def getIndexOfVertex(self, vertex):
+        index = None
+        try: 
+            # Find index of vertex in list
+            index = self.vertexlst.index(vertex)
+        except:
+            pass
+        return index
+
+    # Given a vertex, finds other vertexes it shares and edge with
+    def getNeighborVertexes(self, vertex):
+        neighbors = []
+
+        vIndex = getIndexOfVertex(vertex)
+        if not vIndex:
+            return []
+
+        # Traverse row to find out the vertexes 'vertex' connects to
+        for i in range(len(self.adjmatrix [vIndex])):
+            edge = self.adjmatrix[vIndex][i]
+            if edge:
+                neighbors.append(self.vertexlst[i])
+
+        return neighbors
+
     def addVertex(self, vertex):
         num_vertices = len(self.vertexlst)
         # print "Vert len before " + str(num_vertices)
@@ -127,12 +167,34 @@ def MatchPoints(g1, g2, threshold):
         minDist = sys.maxint
     return matches
 
-# Given a list of matched points, generates an "evolved" (averaged) graph
-def GenerateNewLetter(matches) :
+# Given graphs of letters and a list of matched points, generates an "evolved" (averaged) graph
+def GenerateNewLetter(g1, g2, matches) :
     newGraph = Graph()
+    # Generate average vertexes
     for v1, v2 in matches:
         newVertex = v1.avgVertex(v2)
         newGraph.addVertex(newVertex)
+    # Generate average edges
+    for 
     return newGraph
         
     
+# Find path between a pair of vertexes i and j of len length    
+def findPaths(iVertex, jVertex, len, graph, path):
+    if len == 0:
+        if jVertex in graph.getEdges(iVertex):
+            return path.append(iVertex)
+        else:
+            return None
+    else:
+        jNeighbors = graph.getNeighborVertexes(jVertex)
+        for k in jNeighbors:
+            pathFound = findPaths(iVertex, k, len-1, graph, path):
+            if pathFound:
+                return pathFound.append(k)
+
+
+def generateCrossover(g1, g2):
+    matches = MatchPoints(g1, g2)
+    adj1 = g1.getAdjMatrix()
+    adj2 = g2.getAdjMatrix()
