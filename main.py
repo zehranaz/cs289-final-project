@@ -143,6 +143,7 @@ def find_start(im, nrow, ncol):
     print 'start box', im[rowi][coli] # should be nonzero now
     print 'start index', rowi, coli
     return [currentrow, currentcol]
+
 def neighbors_of_vector(vec, currentrow, currentcol):
     # horizontal vector
     if vec == [0, 1] or vec == [0, -1]:
@@ -159,7 +160,7 @@ def neighbors_of_vector(vec, currentrow, currentcol):
 
 
 # return coordinates of next pixel to go to in neighborhood
-def check_neighborhood(im, nrow, ncol, currentrow, currentcol, r, prev_vector, prev_visited):
+def check_neighborhood(im, nrow, ncol, currentrow, currentcol, r, prev_visited):
     # figure out range of indices to check in neighborhood
     row_start = max(currentrow-r, 0)
     row_end = min(currentrow+r, nrow-1)
@@ -169,6 +170,7 @@ def check_neighborhood(im, nrow, ncol, currentrow, currentcol, r, prev_vector, p
     # find nonzero neighbor with least deviation from previous direction
     row_min, col_min = None, None
     min_angle = 360.
+    pts_to_traverse = []
     for rowi in range(row_start, row_end+1):
         for coli in range(col_start, col_end+1):
             # if not the current pixel
@@ -176,35 +178,71 @@ def check_neighborhood(im, nrow, ncol, currentrow, currentcol, r, prev_vector, p
                 # if not a previously visited pixel
                 if (rowi, coli) not in prev_visited:
                     # if not black
-                    if not im[rowi][coli].all() == 0:
+                    print 'rowi', rowi, 'coli', coli, im[rowi][coli]
+                    if not im[rowi][coli] == 0:
+                        print 'not equal to zero'
+                        '''
                         curr_vector = [rowi - currentrow, coli - currentcol]
                         angle = angle_between(prev_vector, curr_vector)
+
                         if angle < min_angle:
                             min_angle = angle
                             row_min = rowi
                             col_min = coli
+                        '''
+                        prev_visited.add((rowi, coli))
+                        pts_to_traverse.append((rowi, coli))
+                        # check_neighborhood(im, nrow, ncol, rowi, coli, r, prev_vector, prev_visited)
     
+    '''
     print 'min_angle', min_angle, row_min, col_min
     prev_visited.add((row_min, col_min))
     start_new_vertex = min_angle > 0.1
+    '''
     # add left and right neighbors to visited
     '''
     if not start_new_vertex:
         for neighbor in neighbors_of_vector(curr_vector, currentrow, currentcol):
             prev_visited.add(neighbor)
     '''
-    return row_min, col_min, start_new_vertex
+    print 'pts_to_traverse', pts_to_traverse
+    return pts_to_traverse, prev_visited # row_min, col_min, start_new_vertex
+
+def traverse(im, graph, nrow, ncol, currentrow, currentcol, r, imdup, prev_vertex, prev_visited):
+    # get children
+    pts_to_traverse, prev_visited = check_neighborhood(im, nrow, ncol, currentrow, \
+                                                    currentcol, r, prev_visited)
+    
+    # if it's a point of interseciton, add to graph
+    if len(pts_to_traverse) > 1:
+        imdup[currentrow][currentcol] = 1
+        new_vertex = Vertex(currentrow, currentcol)
+        # if not already in the graph, add vertex and edge to previous vertex
+        if not graph.has_vertex(new_vertex):
+            # create an edge between this and previous vertex
+            dist = new_vertex.EuclidDist(prev_vertex)
+            e = Edge(prev_vertex, new_vertex, dist, False)
+            graph.addVertex(new_vertex)
+            graph.addEdge(e)
+            prev_vertex = new_vertex
+
+    # explore children
+    for pt in pts_to_traverse:
+        traverse(im, graph, nrow, ncol, pt[0], pt[1], r, imdup, prev_vertex, prev_visited)
+
+    return imdup
 
 def main_victoria():
 
     char_index = 12
-    for person_index in range(1, 2):
-        filename = "lao_images/000" + str(person_index) + "_" + str(char_index) + ".bmp"
+    for person_index in range(2, 3):
+        filename = "lao_images/000" + str(person_index) + "_" + str(char_index) + "_thin.bmp"
         
     # read image as 2D numpy array
     im = plt.imread(filename)
     nrow, ncol = im.shape[0], im.shape[1]
 
+    # for keeping track of visited
     imdup = np.zeros(im.shape)
 
     # initiate graph
@@ -218,13 +256,17 @@ def main_victoria():
     r = 1 # radius around current pixel to be checked
     prev_visited = set()
     prev_visited.add((currentrow, currentcol))
+    imdup = traverse(im, graph, nrow, ncol, currentrow, currentcol, r, imdup, prev_vertex, prev_visited)
+    '''
     prev_row = currentrow
     prev_col = currentcol
-    numiter = 75
     prev_vector = [1,0] # unit vector for previous direction
-    while True: # TODO: figure out terminating condition
-        currentrow, currentcol, start_new_vertex = check_neighborhood(im, nrow, ncol, currentrow, \
-                                                        currentcol, r, prev_vector, prev_visited)
+    '''
+    '''
+    while True:
+        print 'prev_visited', prev_visited
+        print 'checking', currentrow, currentcol
+
         if currentrow == None:
             break
         # mark the visited pixels in image
@@ -241,20 +283,23 @@ def main_victoria():
         prev_vector = [currentrow - prev_row, currentcol - prev_col]
         prev_row = currentrow
         prev_col = currentcol
+    '''
 
     plt.axis("off")
     plt.imshow(imdup)
     plt.show()
 
     # make the last point a vertex and add it to graph
+    '''
     new_vertex = Vertex(prev_row, prev_col)
     dist = new_vertex.EuclidDist(prev_vertex)
     e = Edge(prev_vertex, new_vertex, dist, False)
     graph.addVertex(new_vertex)
     graph.addEdge(e)
+    '''
 
     graph.print_graph()
 
 
 if __name__ == "__main__":
-    main()
+    main_victoria()
