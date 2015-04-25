@@ -3,8 +3,6 @@ from classes import Graph, Edge, Vertex, MatchPoints, GenerateNewLetter, findPat
 from random import randint
 import matplotlib.pyplot as plt
 import numpy as np
-<<<<<<< HEAD
-import cv2
 import thinning
 import coords_to_img
 
