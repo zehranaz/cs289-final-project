@@ -1,7 +1,9 @@
+#!/usr/bin/env python
 from classes import Graph, Edge, Vertex, MatchPoints, GenerateNewLetter
 from random import randint
 import matplotlib.pyplot as plt
 import numpy as np
+import cv2
 
 def unit_vector(vector):
     """ Returns the unit vector of the vector.  """
@@ -115,6 +117,20 @@ def find_start(im, nrow, ncol):
     print 'start box', im[rowi][coli] # should be nonzero now
     print 'start index', rowi, coli
     return [currentrow, currentcol]
+def neighbors_of_vector(vec, currentrow, currentcol):
+    # horizontal vector
+    if vec == [0, 1] or vec == [0, -1]:
+        return [(currentrow+1, currentcol), (currentrow-1, currentcol)]
+    # vertical vector
+    if vec == [1, 0] or vec == [-1, 0]:
+        return [(currentrow, currentcol-1), (currentrow, currentcol+1)]
+    # downwards diagonal vector
+    if vec == [1, 1] or vec == [-1, -1]:
+        return [(currentrow-1, currentcol+1), (currentrow+1, currentcol-1)]
+    # upwards diagonal vector
+    if vec == [-1, 1] or vec == [1, -1]:
+        return [(currentrow+1, currentcol+1), (currentrow-1, currentcol-1)]
+
 
 # return coordinates of next pixel to go to in neighborhood
 def check_neighborhood(im, nrow, ncol, currentrow, currentcol, r, prev_vector, prev_visited):
@@ -141,21 +157,29 @@ def check_neighborhood(im, nrow, ncol, currentrow, currentcol, r, prev_vector, p
                             min_angle = angle
                             row_min = rowi
                             col_min = coli
-
+    
     print 'min_angle', min_angle, row_min, col_min
     prev_visited.add((row_min, col_min))
     start_new_vertex = min_angle > 0.1
+    # add left and right neighbors to visited
+    '''
+    if not start_new_vertex:
+        for neighbor in neighbors_of_vector(curr_vector, currentrow, currentcol):
+            prev_visited.add(neighbor)
+    '''
     return row_min, col_min, start_new_vertex
 
 def main_victoria():
 
-    char_index = 11
+    char_index = 12
     for person_index in range(1, 2):
         filename = "lao_images/000" + str(person_index) + "_" + str(char_index) + ".bmp"
         
     # read image as 2D numpy array
     im = plt.imread(filename)
     nrow, ncol = im.shape[0], im.shape[1]
+
+    imdup = np.zeros(im.shape)
 
     # initiate graph
     graph = Graph()
@@ -170,11 +194,16 @@ def main_victoria():
     prev_visited.add((currentrow, currentcol))
     prev_row = currentrow
     prev_col = currentcol
-    numiter = 50
+    numiter = 75
     prev_vector = [1,0] # unit vector for previous direction
-    for i in range(numiter): # TODO: figure out terminating condition
+    while True: # TODO: figure out terminating condition
         currentrow, currentcol, start_new_vertex = check_neighborhood(im, nrow, ncol, currentrow, \
                                                         currentcol, r, prev_vector, prev_visited)
+        if currentrow == None:
+            break
+        # mark the visited pixels in image
+        imdup[currentrow][currentcol] = 1
+        
         if start_new_vertex:
             new_vertex = Vertex(currentrow, currentcol)
             # create an edge between this and previous vertex
@@ -187,12 +216,17 @@ def main_victoria():
         prev_row = currentrow
         prev_col = currentcol
 
+    plt.axis("off")
+    plt.imshow(imdup)
+    plt.show()
+
     # make the last point a vertex and add it to graph
-    new_vertex = Vertex(currentrow, currentcol)
+    new_vertex = Vertex(prev_row, prev_col)
     dist = new_vertex.EuclidDist(prev_vertex)
     e = Edge(prev_vertex, new_vertex, dist, False)
     graph.addVertex(new_vertex)
     graph.addEdge(e)
+
     graph.print_graph()
 
 
