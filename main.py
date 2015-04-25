@@ -4,6 +4,8 @@ from random import randint
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
+import thinning
+import coords_to_img
 
 def unit_vector(vector):
     """ Returns the unit vector of the vector.  """
@@ -114,8 +116,8 @@ def find_start(im, nrow, ncol):
             coli = 0
     currentrow = rowi
     currentcol = coli
-    print 'start box', im[rowi][coli] # should be nonzero now
-    print 'start index', rowi, coli
+    # print 'start box', im[rowi][coli] # should be nonzero now
+    # print 'start index', rowi, coli
     return [currentrow, currentcol]
 
 def neighbors_of_vector(vec, currentrow, currentcol):
@@ -152,9 +154,7 @@ def check_neighborhood(im, nrow, ncol, currentrow, currentcol, r, prev_visited):
                 # if not a previously visited pixel
                 if (rowi, coli) not in prev_visited:
                     # if not black
-                    print 'rowi', rowi, 'coli', coli, im[rowi][coli]
                     if not im[rowi][coli] == 0:
-                        print 'not equal to zero'
                         '''
                         curr_vector = [rowi - currentrow, coli - currentcol]
                         angle = angle_between(prev_vector, curr_vector)
@@ -179,7 +179,6 @@ def check_neighborhood(im, nrow, ncol, currentrow, currentcol, r, prev_visited):
         for neighbor in neighbors_of_vector(curr_vector, currentrow, currentcol):
             prev_visited.add(neighbor)
     '''
-    print 'pts_to_traverse', pts_to_traverse
     return pts_to_traverse, prev_visited # row_min, col_min, start_new_vertex
 
 def traverse(im, graph, nrow, ncol, currentrow, currentcol, r, imdup, prev_vertex, prev_visited):
@@ -206,14 +205,14 @@ def traverse(im, graph, nrow, ncol, currentrow, currentcol, r, imdup, prev_verte
 
     return imdup
 
-def main_victoria():
+def fitness_between_nodes(g1, g2, threshold):
+    matching_vertices = MatchPoints(g1, g2, threshold)
+    sum_of_distances = 0.
+    for (v1, v2) in matching_vertices:
+        sum_of_distances += v1.EuclidDist(v2)
+    return sum_of_distances
 
-    char_index = 12
-    for person_index in range(2, 3):
-        filename = "lao_images/000" + str(person_index) + "_" + str(char_index) + "_thin.bmp"
-        
-    # read image as 2D numpy array
-    im = plt.imread(filename)
+def build_graph(im):
     nrow, ncol = im.shape[0], im.shape[1]
 
     # for keeping track of visited
@@ -230,7 +229,40 @@ def main_victoria():
     r = 1 # radius around current pixel to be checked
     prev_visited = set()
     prev_visited.add((currentrow, currentcol))
+
+    # traverse through image and build graph
     imdup = traverse(im, graph, nrow, ncol, currentrow, currentcol, r, imdup, prev_vertex, prev_visited)
+
+    plt.axis("off")
+    plt.imshow(imdup)
+    plt.show()
+
+    # graph.print_graph()
+
+    return graph
+
+def main_victoria():
+
+    graphs = []
+    char_indices = [11, 12]
+    person_indices = range(1, 6)
+    for char_index in char_indices:
+        for person_index in person_indices:
+            # produce bmp
+            coords_to_img.convert_images(person_indices, char_indices)
+
+            # thinning
+            infile = "lao_images/000" + str(person_index) + "_" + str(char_index) + ".bmp"
+            outfile = "lao_images/000" + str(person_index) + "_" + str(char_index) + "_thin.bmp"
+            thinning.thin_image(infile, outfile)
+
+            # build graph
+            im = plt.imread(outfile)
+            graphs.append(build_graph(im))
+
+    print fitness_between_nodes(graphs[2], graphs[3], 50)
+
+
     '''
     prev_row = currentrow
     prev_col = currentcol
@@ -259,9 +291,7 @@ def main_victoria():
         prev_col = currentcol
     '''
 
-    plt.axis("off")
-    plt.imshow(imdup)
-    plt.show()
+    
 
     # make the last point a vertex and add it to graph
     '''
@@ -271,8 +301,6 @@ def main_victoria():
     graph.addVertex(new_vertex)
     graph.addEdge(e)
     '''
-
-    graph.print_graph()
 
 
 if __name__ == "__main__":

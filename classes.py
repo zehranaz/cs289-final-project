@@ -23,6 +23,8 @@ class Vertex:
         newv = Vertex(meanx, meany)
         return newv
     def __eq__(self, other):
+        if other == None:
+            return False
         if self.x == other.x and self.y == other.y:
             return True
         return False
@@ -115,7 +117,7 @@ class Graph:
             new_empty_row = [None for x in range(len(self.vertexlst))]
             self.adjmatrix.append(new_empty_row)  # add a new row 
                     
-        print "Dim of matrix after " + str(len(self.adjmatrix)) + " " + str(len(self.adjmatrix[0]))
+        # print "Dim of matrix after " + str(len(self.adjmatrix)) + " " + str(len(self.adjmatrix[0]))
         
     # find the index of each vertex in the vertex list and use it to locate it in the adj matrix   
     def addEdge(self, edge):
@@ -185,7 +187,7 @@ def GenerateNewLetter(g1, g2, matches) :
         newVertex = v1.avgVertex(v2)
         newGraph.addVertex(newVertex)
     # Generate average edges
-    for 
+    # for 
     return newGraph
         
     
@@ -199,7 +201,7 @@ def findPaths(iVertex, jVertex, len, graph, path):
     else:
         jNeighbors = graph.getNeighborVertexes(jVertex)
         for k in jNeighbors:
-            pathFound = findPaths(iVertex, k, len-1, graph, path):
+            pathFound = findPaths(iVertex, k, len-1, graph, path)
             if pathFound:
                 return pathFound.append(k)
 
