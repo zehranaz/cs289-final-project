@@ -22,6 +22,10 @@ class Vertex:
         meany = self.y + (vertex2.y - self.y)/2
         newv = Vertex(meanx, meany)
         return newv
+    def __eq__(self, other):
+        if self.x == other.x and self.y == other.y:
+            return True
+        return False
 
 class Edge:
     def __init__(self, startv, endv, max_dist, iscurve):
@@ -42,6 +46,12 @@ class Graph:
     def __init__(self):
         self.vertexlst = []
         self.adjmatrix = [] # will be a nested list of form [[1, 0], [0, 1]], also a symmetric matrix
+
+    def has_vertex(self, vertex):
+        for v in self.vertexlst:
+            if v == vertex:
+                return True
+        return False
         
     def getVertexes (self):
         return self.vertexlst

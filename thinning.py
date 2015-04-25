@@ -53,7 +53,10 @@ def thinning(src):
     return dst * 255
 
 if __name__ == "__main__":
-    filename = "lao_images/0001_12.bmp"
+    char_index = 12
+    person_index = 2
+    filename = "lao_images/000" + str(person_index) + "_" + str(char_index) + ".bmp"
+    print filename
     src = cv2.imread(filename)
     if src == None:
         sys.exit()
@@ -66,4 +69,4 @@ if __name__ == "__main__":
     cv2.imshow("thinning", bw2)
     cv2.waitKey(0)
     '''
-    cv2.imwrite('lao_images/0001_12_thin.bmp', bw2)
+    cv2.imwrite("lao_images/000"+ str(person_index) + "_" + str(char_index) + "_thin.bmp", bw2)
