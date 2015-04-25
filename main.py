@@ -1,5 +1,7 @@
+<<<<<<< HEAD
 #!/usr/bin/env python
-from classes import Graph, Edge, Vertex
+from classes import Graph, Edge, Vertex, MatchPoints, GenerateNewLetter
+from random import randint
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
@@ -58,6 +60,43 @@ def tests():
     graph.addEdge(e2)
     print("Real Print starts here ")
     graph.print_graph()
+
+# returns graph with numPoints vertexes; random number of vertexes if None specified
+def makeTestGraph(numPoints=None):
+    graph = Graph()
+    # Pixels always between 33 x 48
+    if not numPoints:
+        numPoints = randint(5,10)
+    for i in range(numPoints):
+        v = Vertex(int(randint(0,33)), int(randint(0,48)))
+        graph.addVertex(v)
+    return graph
+
+
+def testMatch():
+    g1 = makeTestGraph()
+    g2 = makeTestGraph()
+    print "Graph 1:"
+    g1.print_vertexlst()
+
+    print "Graph 2:"
+    g2.print_vertexlst()
+    
+    matches = MatchPoints(g1, g2, threshold = 4)
+    print matches
+    for v1,v2 in matches:
+        print "(", v1.print_out(), v2.print_out(), ")",
+    return matches
+
+def testMating():
+    matches = testMatch()
+    newGraph = GenerateNewLetter(matches)
+    newGraph.print_vertexlst()
+
+
+def main() :
+    testMating()
+
 
 # walk through image diagonally until see something black
 def find_start(im, nrow, ncol):
@@ -127,7 +166,7 @@ def check_neighborhood(im, nrow, ncol, currentrow, currentcol, r, prev_vector, p
     '''
     return row_min, col_min, start_new_vertex
 
-def main():
+def main_victoria():
 
     char_index = 12
     for person_index in range(1, 2):

@@ -1,6 +1,7 @@
 import math
 import numpy as np
 import __builtin__
+import sys
 
 class Vertex:
     def __init__(self, x, y):
@@ -15,6 +16,12 @@ class Vertex:
         return self.y
     def print_out(self):
         return str(self.x) + ", " + str(self.y)
+    # returns coordinates of self averaged with vertex2
+    def avgVertex(self, vertex2):
+        meanx = self.x + (vertex2.x - self.x)/2
+        meany = self.y + (vertex2.y - self.y)/2
+        newv = Vertex(meanx, meany)
+        return newv
 
 class Edge:
     def __init__(self, startv, endv, max_dist, iscurve):
@@ -36,6 +43,12 @@ class Graph:
         self.vertexlst = []
         self.adjmatrix = [] # will be a nested list of form [[1, 0], [0, 1]], also a symmetric matrix
         
+    def getVertexes (self):
+        return self.vertexlst
+
+    def getAdjMatrix (self):
+        return self.adjmatrix
+
     def addVertex(self, vertex):
         num_vertices = len(self.vertexlst)
         # print "Vert len before " + str(num_vertices)
@@ -70,12 +83,6 @@ class Graph:
         self.adjmatrix[start_i][end_i] = edge # assuming this is pass by reference
         self.adjmatrix[end_i][start_i] = edge
 
-    # return vertex with averaged x and y coordinates
-    def avgVertex(vertex1, vertex2):
-        meanx = vertex1.x + (vertex2.x - vertex1.x)/2
-        meany = vertex1.y + (vertex2.y - vertex1.y)/2
-        newv = Vertex(meanx, meany)
-        return newv
     def print_adjmatrix(self):
         print "Adjacency Matrix"
         for row in self.adjmatrix:
@@ -95,5 +102,37 @@ class Graph:
         self.print_vertexlst()
         self.print_adjmatrix()
 
+
+# Given two graphs and threshold (float for the max dist acceptable between two matching points), find the corresponding points; return as list
+# TODO: an improved version would be one that minimizes total distance between all nodes
+def MatchPoints(g1, g2, threshold):
+    ver1 = g1.getVertexes()
+    ver2 = g2.getVertexes()
+    matches = []
+
+    # find two vertexes with min distance
+    minDist = sys.maxint
+    closestVertex = None
+    for v1 in ver1:
+        for v2 in ver2:
+            dist = v1.EuclidDist(v2)
+            if dist < minDist:
+                minDist = dist
+                closestVertex = v2
+        if not closestVertex == None and minDist <= threshold:
+            matches.append((v1, closestVertex))
+            ver2.remove(v2)
+            ver1.remove(v1)
+        closestVertex = None
+        minDist = sys.maxint
+    return matches
+
+# Given a list of matched points, generates an "evolved" (averaged) graph
+def GenerateNewLetter(matches) :
+    newGraph = Graph()
+    for v1, v2 in matches:
+        newVertex = v1.avgVertex(v2)
+        newGraph.addVertex(newVertex)
+    return newGraph
         
     
