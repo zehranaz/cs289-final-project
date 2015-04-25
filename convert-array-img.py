@@ -1,10 +1,19 @@
+#!/usr/bin/env python
 # Convert list of coordinates into pictures.
 import numpy as np
 import PIL
 from PIL import Image
+import matplotlib.pyplot as plt
+from scipy.signal import wiener
 import math
+import cv2
 
-def make_image_from_coords (coordinates, name):
+def enhance_image(input_image):
+    my_im = input_image.copy()
+    my_im = wiener(my_im)
+    return my_im
+
+def make_image_from_coords(coordinates, name):
 	x, y = [i[0] for i in coordinates], [i[1] for i in coordinates]
 	max_x, max_y = max(x), max(y)
 	min_x, min_y = min(x), min(y)
@@ -21,6 +30,41 @@ def make_image_from_coords (coordinates, name):
 
 	# save as bitmap image
 	im.save('lao_images/' + name + '.bmp')
+
+	# thinning
+	img = cv2.imread('lao_images/' + name + '.bmp')
+	'''
+	cv2.imshow('Original',img)
+	cv2.waitKey(0)
+
+	gray_im = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+	cv2.imshow('Gray',gray_im)
+	cv2.waitKey(0)
+
+	enhanced_im = enhance_image(gray_im)
+	enhanced_im  = np.array(enhanced_im, np.uint8)
+	ret, thresh1 = cv2.threshold(enhanced_im,250,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+
+	cv2.imshow('thresh1', thresh1)
+	cv2.waitKey(0)
+
+	
+	plt.axis("off")
+	plt.imshow(thresh1)
+	plt.show()
+	
+
+	kernel = np.ones((2,2),np.uint8)
+	erosion = cv2.erode(thresh1, kernel, iterations = 1)
+	cv2.imshow('eroded', erosion)
+
+	cv2.imwrite('lao_images/eroded' + name + '.bmp', erosion)
+	
+	plt.axis("off")
+	plt.imshow(erosion)
+	plt.show()
+	'''
+
 	# return width and height of image
 	return (max_x - min_x, max_y - min_y)
 
@@ -128,7 +172,7 @@ def main():
     """
 	# pick the people and character indices that you want to convert
 	person_lst = [1, 2] # works for persons 0-9
-	char_lst = [1, 11, 12]
+	char_lst = [1,11,12]
 	img_sizes = convert("Distribution/Data/", person_lst, char_lst)
 
 	# determine the width and height each image should be scaled to
