@@ -214,7 +214,9 @@ def traverse(im, graph, nrow, ncol, currentrow, currentcol, r, imdup, prev_verte
 def fitness_between_nodes(g1, g2, threshold):
     matching_vertices = MatchPoints(g1, g2, threshold)
     # if insufficient number of points matched
+    print 'number of matching nodes', len(matching_vertices), g1.numVertices()
     if len(matching_vertices) < g1.numVertices():
+        print 'too few matches'
         return sys.maxint
     sum_of_distances = 0.
     for (v1, v2) in matching_vertices:
@@ -251,45 +253,74 @@ def build_graph(im, fbasename):
     
     return graph
 
-def main_victoria():
+# order of work:
+# 1) produce bmp from coordinates
+# 2) thin the bmp's
+# 3) build the graph from the thinned image
+def produce_graphs(char_indices, person_indices, jobtype):
+    redo_thinning = False
     graphs = defaultdict(list)
-    char_indices = [11, 12]
-    person_indices = range(1, 10)
     for char_index in char_indices:
         for person_index in person_indices:
             if person_index < 10:
                 fbasename = "lao_images/000" + str(person_index) + "_" + str(char_index)
             else:
                 fbasename = "lao_images/00" + str(person_index) + "_" + str(char_index)
-            # produce bmp from list of coordinates if it doesn't already exist
-            if not os.path.isfile(fbasename + ".bmp"):
-                coords_to_img.convert_images(person_indices, char_indices)
-            # produce thinned bitmap if it doesn't already exist
-            if not os.path.isfile(fbasename + "_thin.bmp"):
+            if jobtype == "coords":
+                # produce bmp from list of coordinates if it doesn't already exist
+                if not os.path.isfile(fbasename + ".bmp"):
+                    coords_to_img.convert_images(person_indices, char_indices)
+                if not os.path.isfile(fbasename + "_thin.bmp"):
+                    redo_thinning = True
+            elif jobtype == "thin":
                 infile = fbasename + ".bmp"
                 outfile = fbasename + "_thin.bmp"
                 thinning.thin_image(infile, outfile)
-            # build graph
-            im = plt.imread(fbasename + "_thin.bmp")
-            graphs[char_index].append(build_graph(im, fbasename))
+            elif jobtype == "graph":
+                im = plt.imread(fbasename + "_thin.bmp")
+                graphs[char_index].append(build_graph(im, fbasename))
+    if jobtype == "graph":
+        return graphs
+    elif redo_thinning:
+        return produce_graphs(char_indices, person_indices, "thin")
+    else:
+        return produce_graphs(char_indices, person_indices, "graph")
+
+
+def main_victoria():
+    char_indices = [11, 12, 9, 5]
+    person_indices = range(1, 10)
+    
+    # produce graphs for each character
+    graphs = produce_graphs(char_indices, person_indices, "coords")
 
     # evaluate fitness between one graph and all other graphs
-    test_char_index = 11
-    test_person_index = 1
-    test_graph = graphs[test_char_index][test_person_index]
-    closest_char = None
-    min_fitness_val = sys.maxint
-    for char_index in char_indices:
-        for person_index in person_indices:
-            if not (char_index == test_char_index and person_index == test_person_index):
-                g1 = copy.deepcopy(test_graph)
-                g2 = copy.deepcopy(graphs[char_index][person_index-1])
-                fitness = fitness_between_nodes(g1, g2, 200)
-                if fitness < min_fitness_val:
-                    min_fitness_val = fitness
-                    closest_char = char_index
-                print person_index, char_index, fitness
-    print 'classification of', test_char_index, 'is', closest_char, 'with fitness', min_fitness_val
+    test_char_indices = [11, 12, 9, 5]
+    test_person_indices = range(0, 9)
+    correct_classifications = defaultdict(int)
+
+    for test_char_index in test_char_indices:
+        for test_person_index in test_person_indices:
+            test_graph = graphs[test_char_index][test_person_index]
+            closest_char = None
+            min_fitness_val = sys.maxint
+            print 'classifying character', test_char_index, 'by person', test_person_index
+            for char_index in char_indices:
+                for person_index in person_indices:
+                    if not (char_index == test_char_index and person_index == test_person_index):
+                        g1 = copy.deepcopy(test_graph)
+                        g2 = copy.deepcopy(graphs[char_index][person_index-1])
+                        fitness = fitness_between_nodes(g1, g2, sys.maxint)
+                        if fitness < min_fitness_val:
+                            min_fitness_val = fitness
+                            closest_char = char_index
+                        print person_index, char_index, fitness
+            print 'classification of character', test_char_index, 'by person', \
+                    test_person_index, 'is', closest_char, 'with fitness', min_fitness_val
+            if closest_char == test_char_index:
+                correct_classifications[test_char_index] += 1
+    for char,num_correct in correct_classifications.items():
+        print char, num_correct, num_correct / float(len(test_person_indices))
 
 
 if __name__ == "__main__":

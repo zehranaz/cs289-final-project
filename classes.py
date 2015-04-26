@@ -163,6 +163,7 @@ def MatchPoints(g1, g2, threshold):
     for v1 in ver1:
         for v2 in ver2:
             dist = v1.EuclidDist(v2)
+            print 'v1', v1.print_out(), 'v2', v2.print_out(), 'dist', dist
             if dist < minDist:
                 minDist = dist
                 closestVertex = v2
