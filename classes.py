@@ -90,7 +90,7 @@ class Graph:
         neighbors = []
 
         vIndex = self.getIndexOfVertex(vertex)
-        if not vIndex:
+        if vIndex == None:
             return []
 
         # Traverse row to find out the vertexes 'vertex' connects to
@@ -188,7 +188,7 @@ def findPaths(iVertex, jVertex, length, graph, path):
         jNeighbors = graph.getNeighborVertexes(jVertex)
         for k in jNeighbors:
             pathFound = findPaths(iVertex, k, length-1, graph, path)
-            if pathFound and not k in path:
+            if pathFound and not k in pathFound:
                  pathFound.append(k)
                  return pathFound
         return []
@@ -200,9 +200,20 @@ def findAllPaths(graph, length_limit=4):
     pathsFound = []
 
     for length in range(length_limit + 1):
-        for v1 in range(numVertexes):
+        print "For length: " + str(length)
+        for v1 in range(numVertexes-1):
+            print "vertex from: "  + str(v1)
             for v2 in range(v1 + 1, numVertexes):
-                pathsFound.append(findPaths(vertexList[v1], vertexList[v2], length, graph, []))
+                print "vertex to: "  + str(v2)
+                if v1 == v2:
+                    continue
+                paths = []
+                paths = findPaths(vertexList[v1], vertexList[v2], length, graph, paths)
+                if not paths == []:
+                    paths.append(vertexList[v2]) # Add the last vertex in the path
+                    pathsFound.append(paths)    # Save the paths
+                    for v in paths:
+                        print v.print_out()
     return pathsFound
 
 # Given graphs of letters, generates an "evolved" (averaged) graph
@@ -222,7 +233,7 @@ def CrossOver(g1, g2):
     # lay out all edges as in g1
     # get common paths btw the 2: v1, v2 -> match[v1], match[v2]
     # replace common ones on random 50% chance of replacement based on how many common paths found
-    
+
 
     return newGraph
 

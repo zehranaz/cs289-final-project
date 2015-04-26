@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from classes import Graph, Edge, Vertex, MatchPoints, findPaths
+from classes import Graph, Edge, Vertex, MatchPoints, findPaths, findAllPaths
 from random import randint
 import matplotlib.pyplot as plt
 import numpy as np
@@ -61,36 +61,7 @@ def tests():
     print("Real Print starts here ")
     graph.print_graph()
 
-# returns graph with numPoints vertexes; random number of vertexes if None specified
-def makeTestGraph(numPoints=None):
-    graph = Graph()
-    # Pixels always between 33 x 48
-    if not numPoints:
-        numPoints = randint(5,10)
-    for i in range(numPoints):
-        v = Vertex(int(randint(0,33)), int(randint(0,48)))
-        graph.addVertex(v)
-    return graph
-
-
-def testMatch(g1=None, g2=None):
-    if g1 == None:
-        g1 = makeTestGraph()
-    if g2 == None:  
-        g2 = makeTestGraph()
-    print "Graph 1:"
-    g1.print_vertexlst()
-
-    print "Graph 2:"
-    g2.print_vertexlst()
-    
-    matches = MatchPoints(g1, g2, threshold = 4)
-    print matches
-    for v1,v2 in matches:
-        print "(", v1.print_out(), v2.print_out(), ")",
-    return matches
-
-def testFindPaths():
+def makeSpecificGraph():
     # Set up graph
     graph = Graph()
 
@@ -115,6 +86,54 @@ def testFindPaths():
 
     e3 = Edge(v3, v4, v3.EuclidDist(v4), False)
     graph.addEdge(e3)
+    return graph
+
+def testGetNeighbors():
+    graph = makeSpecificGraph()
+    vertexes = graph.getVertexes()
+    for index in range(len(vertexes)):
+        print "For vertex " + str(index)
+        neighbors = graph.getNeighborVertexes(vertexes[index])
+
+        for vertex in neighbors:
+            print vertex.print_out()
+
+# returns graph with numPoints vertexes; random number of vertexes if None specified
+def makeTestGraph(numPoints=None):
+    graph = Graph()
+    # Pixels always between 33 x 48
+    if not numPoints:
+        numPoints = randint(5,10)
+    for i in range(numPoints):
+        v = Vertex(int(randint(0,33)), int(randint(0,48)))
+        graph.addVertex(v)
+    return graph
+
+def testMatch(g1=None, g2=None):
+    if g1 == None:
+        g1 = makeTestGraph()
+    if g2 == None:  
+        g2 = makeTestGraph()
+    print "Graph 1:"
+    g1.print_vertexlst()
+
+    print "Graph 2:"
+    g2.print_vertexlst()
+    
+    matches = MatchPoints(g1, g2, threshold = 4)
+    print matches
+    for v1,v2 in matches:
+        print "(", v1.print_out(), v2.print_out(), ")",
+    return matches
+
+def testFindPaths():
+    # Set up graph
+    graph = makeSpecificGraph()
+    vertexes = graph.getVertexes()
+    v1 = vertexes[0]
+    v2 = vertexes[1]
+    v3 = vertexes[2]
+    v4 = vertexes[3]
 
     path = []
     findPaths(v2, v3, 1, graph, path)
@@ -127,6 +146,21 @@ def testFindPaths():
     for v in path:
         print v.print_out()
 
+    allPaths = findAllPaths(graph)
+    # print allPaths
+    # index = 0
+    # for path in allPaths:
+
+    #     print "Path " + str(index)
+    #     index += 1
+    #     # print "start: "
+    #     # print path[0].print_out()
+    #     # print "end: " 
+    #     # print  path[len(path) - 1].print_out()
+    #     print "Path list: "
+    #     for v in path:
+    #         print v.print_out(), 
+    #     #print allPaths[path]
 
 def testMating():
     g1 = makeTestGraph()
@@ -138,6 +172,7 @@ def testMating():
 
 def main() :
     testFindPaths()
+    #testGetNeighbors()
 
 
 # walk through image diagonally until see something black
