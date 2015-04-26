@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 from classes import Graph, Edge, Vertex, MatchPoints, findPaths, findAllPaths
 from random import randint
+from collections import defaultdict
 import matplotlib.pyplot as plt
 import numpy as np
 import thinning
 import coords_to_img
+import os.path
+import copy
+import sys
+import math
 
 def unit_vector(vector):
     """ Returns the unit vector of the vector.  """
@@ -170,7 +175,7 @@ def testMating():
     newGraph.print_vertexlst()
 
 
-def main() :
+def main():
     testFindPaths()
     #testGetNeighbors()
 
@@ -191,20 +196,6 @@ def find_start(im, nrow, ncol):
     # print 'start box', im[rowi][coli] # should be nonzero now
     # print 'start index', rowi, coli
     return [currentrow, currentcol]
-
-def neighbors_of_vector(vec, currentrow, currentcol):
-    # horizontal vector
-    if vec == [0, 1] or vec == [0, -1]:
-        return [(currentrow+1, currentcol), (currentrow-1, currentcol)]
-    # vertical vector
-    if vec == [1, 0] or vec == [-1, 0]:
-        return [(currentrow, currentcol-1), (currentrow, currentcol+1)]
-    # downwards diagonal vector
-    if vec == [1, 1] or vec == [-1, -1]:
-        return [(currentrow-1, currentcol+1), (currentrow+1, currentcol-1)]
-    # upwards diagonal vector
-    if vec == [-1, 1] or vec == [1, -1]:
-        return [(currentrow+1, currentcol+1), (currentrow-1, currentcol-1)]
 
 
 # return coordinates of next pixel to go to in neighborhood
@@ -227,37 +218,15 @@ def check_neighborhood(im, nrow, ncol, currentrow, currentcol, r, prev_visited):
                 if (rowi, coli) not in prev_visited:
                     # if not black
                     if not im[rowi][coli] == 0:
-                        '''
-                        curr_vector = [rowi - currentrow, coli - currentcol]
-                        angle = angle_between(prev_vector, curr_vector)
-
-                        if angle < min_angle:
-                            min_angle = angle
-                            row_min = rowi
-                            col_min = coli
-                        '''
                         prev_visited.add((rowi, coli))
                         pts_to_traverse.append((rowi, coli))
-                        # check_neighborhood(im, nrow, ncol, rowi, coli, r, prev_vector, prev_visited)
-    
-    '''
-    print 'min_angle', min_angle, row_min, col_min
-    prev_visited.add((row_min, col_min))
-    start_new_vertex = min_angle > 0.1
-    '''
-    # add left and right neighbors to visited
-    '''
-    if not start_new_vertex:
-        for neighbor in neighbors_of_vector(curr_vector, currentrow, currentcol):
-            prev_visited.add(neighbor)
-    '''
+
     return pts_to_traverse, prev_visited # row_min, col_min, start_new_vertex
 
 def traverse(im, graph, nrow, ncol, currentrow, currentcol, r, imdup, prev_vertex, prev_visited):
     # get children
     pts_to_traverse, prev_visited = check_neighborhood(im, nrow, ncol, currentrow, \
                                                     currentcol, r, prev_visited)
-    
     # if it's a point of interseciton, add to graph
     if len(pts_to_traverse) > 1:
         imdup[currentrow][currentcol] = 1
@@ -279,15 +248,19 @@ def traverse(im, graph, nrow, ncol, currentrow, currentcol, r, imdup, prev_verte
 
 def fitness_between_nodes(g1, g2, threshold):
     matching_vertices = MatchPoints(g1, g2, threshold)
+    # if insufficient number of points matched
+    if len(matching_vertices) < g1.numVertices():
+        return sys.maxint
     sum_of_distances = 0.
     for (v1, v2) in matching_vertices:
         sum_of_distances += v1.EuclidDist(v2)
-    return sum_of_distances
+    return math.sqrt(sum_of_distances)
 
-def build_graph(im):
+def build_graph(im, fbasename):
+    # get image dimensions
     nrow, ncol = im.shape[0], im.shape[1]
 
-    # for keeping track of visited
+    # for keeping visual of points added to graph
     imdup = np.zeros(im.shape)
 
     # initiate graph
@@ -305,75 +278,54 @@ def build_graph(im):
     # traverse through image and build graph
     imdup = traverse(im, graph, nrow, ncol, currentrow, currentcol, r, imdup, prev_vertex, prev_visited)
 
-    plt.axis("off")
+    # save to file
+    fig1 = plt.gcf()
     plt.imshow(imdup)
-    plt.show()
-
-    # graph.print_graph()
-
+    plt.draw()
+    fig1.savefig(fbasename + "_graph.jpg")
+    
     return graph
 
 def main_victoria():
-
-    graphs = []
+    graphs = defaultdict(list)
     char_indices = [11, 12]
-    person_indices = range(1, 6)
+    person_indices = range(1, 10)
     for char_index in char_indices:
         for person_index in person_indices:
-            # produce bmp
-            coords_to_img.convert_images(person_indices, char_indices)
-
-            # thinning
-            infile = "lao_images/000" + str(person_index) + "_" + str(char_index) + ".bmp"
-            outfile = "lao_images/000" + str(person_index) + "_" + str(char_index) + "_thin.bmp"
-            thinning.thin_image(infile, outfile)
-
+            if person_index < 10:
+                fbasename = "lao_images/000" + str(person_index) + "_" + str(char_index)
+            else:
+                fbasename = "lao_images/00" + str(person_index) + "_" + str(char_index)
+            # produce bmp from list of coordinates if it doesn't already exist
+            if not os.path.isfile(fbasename + ".bmp"):
+                coords_to_img.convert_images(person_indices, char_indices)
+            # produce thinned bitmap if it doesn't already exist
+            if not os.path.isfile(fbasename + "_thin.bmp"):
+                infile = fbasename + ".bmp"
+                outfile = fbasename + "_thin.bmp"
+                thinning.thin_image(infile, outfile)
             # build graph
-            im = plt.imread(outfile)
-            graphs.append(build_graph(im))
+            im = plt.imread(fbasename + "_thin.bmp")
+            graphs[char_index].append(build_graph(im, fbasename))
 
-    print fitness_between_nodes(graphs[2], graphs[3], 50)
-
-
-    '''
-    prev_row = currentrow
-    prev_col = currentcol
-    prev_vector = [1,0] # unit vector for previous direction
-    '''
-    '''
-    while True:
-        print 'prev_visited', prev_visited
-        print 'checking', currentrow, currentcol
-
-        if currentrow == None:
-            break
-        # mark the visited pixels in image
-        imdup[currentrow][currentcol] = 1
-        
-        if start_new_vertex:
-            new_vertex = Vertex(currentrow, currentcol)
-            # create an edge between this and previous vertex
-            dist = new_vertex.EuclidDist(prev_vertex)
-            e = Edge(prev_vertex, new_vertex, dist, False)
-            graph.addVertex(new_vertex)
-            graph.addEdge(e)
-            prev_vertex = new_vertex
-        prev_vector = [currentrow - prev_row, currentcol - prev_col]
-        prev_row = currentrow
-        prev_col = currentcol
-    '''
-
-    
-
-    # make the last point a vertex and add it to graph
-    '''
-    new_vertex = Vertex(prev_row, prev_col)
-    dist = new_vertex.EuclidDist(prev_vertex)
-    e = Edge(prev_vertex, new_vertex, dist, False)
-    graph.addVertex(new_vertex)
-    graph.addEdge(e)
-    '''
+    # evaluate fitness between one graph and all other graphs
+    test_char_index = 11
+    test_person_index = 1
+    test_graph = graphs[test_char_index][test_person_index]
+    closest_char = None
+    min_fitness_val = sys.maxint
+    for char_index in char_indices:
+        for person_index in person_indices:
+            if not (char_index == test_char_index and person_index == test_person_index):
+                g1 = copy.deepcopy(test_graph)
+                g2 = copy.deepcopy(graphs[char_index][person_index-1])
+                fitness = fitness_between_nodes(g1, g2, 200)
+                if fitness < min_fitness_val:
+                    min_fitness_val = fitness
+                    closest_char = char_index
+                print person_index, char_index, fitness
+    print 'classification of', test_char_index, 'is', closest_char, 'with fitness', min_fitness_val
 
 
 if __name__ == "__main__":
-    main()
+    main_victoria()
