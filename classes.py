@@ -54,7 +54,8 @@ class Graph:
             if v == vertex:
                 return True
         return False
-        
+    def numVertices(self):
+        return len(self.vertexlst)
     def getVertexes (self):
         return self.vertexlst
 
@@ -156,7 +157,6 @@ def MatchPoints(g1, g2, threshold):
     ver1 = g1.getVertexes()
     ver2 = g2.getVertexes()
     matches = []
-
     # find two vertexes with min distance
     minDist = sys.maxint
     closestVertex = None
