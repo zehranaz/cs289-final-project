@@ -54,8 +54,7 @@ class Graph:
             if v == vertex:
                 return True
         return False
-    def numVertices(self):
-        return len(self.vertexlst)
+        
     def getVertexes (self):
         return self.vertexlst
 
@@ -157,6 +156,7 @@ def MatchPoints(g1, g2, threshold):
     ver1 = g1.getVertexes()
     ver2 = g2.getVertexes()
     matches = []
+
     # find two vertexes with min distance
     minDist = sys.maxint
     closestVertex = None
@@ -175,9 +175,10 @@ def MatchPoints(g1, g2, threshold):
     return matches
         
 # TODO: Needs optimization from dynamic programming storage (can store if there is a path in an adj matrix and lay out the paths there)
-# TODO: test this!!
 # Find path between a pair of vertexes i and j of len length    
-def findPaths(iVertex, jVertex, length, graph, path):
+def findPathsWithoutLast(iVertex, jVertex, length, graph, path):
+    if length < 0:
+        raise Exception("path length cannot be < zero")
     if length == 0:
         if jVertex in graph.getNeighborVertexes(iVertex):
             path.append(iVertex)
@@ -185,13 +186,30 @@ def findPaths(iVertex, jVertex, length, graph, path):
         else:
             return []
     else:
+        # iterate through neighbors k of j and paths from i to k
         jNeighbors = graph.getNeighborVertexes(jVertex)
         for k in jNeighbors:
-            pathFound = findPaths(iVertex, k, length-1, graph, path)
-            if pathFound and not k in pathFound:
+            pathFound = findPathsWithoutLast(iVertex, k, length-1, graph, path)
+            if k in pathFound:
+                path = []
+                pathFound = []
+                continue
+            if not pathFound == []:
                  pathFound.append(k)
                  return pathFound
         return []
+
+# Find between vertex i and j, then append j to the path list
+def findPaths(iVertex, jVertex, length, graph, path):
+    pathFound = findPathsWithoutLast(iVertex, jVertex, length, graph, path)
+    if not pathFound == []:
+        if jVertex not in pathFound: 
+            pathFound.append(jVertex)
+    # Check to make sure that the path length adds up (i.e. 'length' vertexes are between 'i' and 'j')
+    if not len(pathFound) == length + 2:
+        pathFound = []
+    return pathFound
+
 
 # Given a graph, finds all paths in it up to length_limit length
 def findAllPaths(graph, length_limit=4):
@@ -202,15 +220,14 @@ def findAllPaths(graph, length_limit=4):
     for length in range(length_limit + 1):
         print "For length: " + str(length)
         for v1 in range(numVertexes-1):
-            print "vertex from: "  + str(v1)
+            print "vertex from: "  + str(v1+1)
             for v2 in range(v1 + 1, numVertexes):
-                print "vertex to: "  + str(v2)
+                print "vertex to: "  + str(v2+1)
                 if v1 == v2:
                     continue
                 paths = []
                 paths = findPaths(vertexList[v1], vertexList[v2], length, graph, paths)
                 if not paths == []:
-                    paths.append(vertexList[v2]) # Add the last vertex in the path
                     pathsFound.append(paths)    # Save the paths
                     for v in paths:
                         print v.print_out()

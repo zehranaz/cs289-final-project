@@ -328,4 +328,4 @@ def main_victoria():
 
 
 if __name__ == "__main__":
-    main_victoria()
+    main()
