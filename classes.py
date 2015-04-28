@@ -2,6 +2,8 @@ import math
 import numpy as np
 import __builtin__
 import sys
+import copy
+from random import randint, random 
 
 class Vertex:
     def __init__(self, x, y):
@@ -14,6 +16,13 @@ class Vertex:
         return self.x
     def get_y(self):
         return self.y
+    def change_x(self, new_x):
+        self.x = new_x
+    def change_y(self, new_y):
+        self.y = new_y
+    def changeVertex(self, newVertex):
+        self.change_x(newVertex.x)
+        self.change_y(newVertex.y)
     def print_out(self):
         return str(self.x) + ", " + str(self.y)
     # returns coordinates of self averaged with vertex2
@@ -35,12 +44,22 @@ class Edge:
         self.endv = endv
         self.max_dist = max_dist
         self.iscurve = iscurve
+   
     def get_startv(self):
         return self.startv
+    
+    def set_startv(self, newStartV):
+        self.startv = newStartV
+    
     def get_endv(self):
         return self.endv
+    
+    def set_endv(self, newEndV):
+        self.endv = newEndV
+   
     def get_max_dist(self):
         return self.max_dist
+   
     def print_out(self):
         return "Edge Info - Start: " + self.startv.print_out() + ", End: " + self.endv.print_out() + ", Max Dist: " + str(self.max_dist) + ", is Curve: " + str(self.iscurve)
 
@@ -54,13 +73,16 @@ class Graph:
             if v == vertex:
                 return True
         return False
-    def numVertices(self):
-        return len(self.vertexlst)
+        
     def getVertexes (self):
         return self.vertexlst
 
     def getAdjMatrix (self):
         return self.adjmatrix
+
+    # Returns the edge between v1 and v2
+    def getEdge(self, v1, v2):
+        return self.adjmatrix[self.getIndexOfVertex(v1)][self.getIndexOfVertex(v2)]
 
     # Given a vertex, get its edges
     def getEdges (self, vertex):
@@ -119,7 +141,18 @@ class Graph:
             self.adjmatrix.append(new_empty_row)  # add a new row 
         # print "Dim of matrix after " + str(len(self.adjmatrix)) + " " + str(len(self.adjmatrix[0]))
 
-        
+    # Takes a vertex and removes it.
+    def removeVertex(self, vertex):
+        print "REMOVING VERTEX: ",
+        print vertex
+        vIndex = self.getIndexOfVertex(vertex)
+        print "VINDEX = " + str(vIndex) + " and vertex = ",
+        print vertex.print_out()
+        if vIndex:
+            self.adjmatrix = np.delete(self.adjmatrix, vIndex, 0)
+            self.adjmatrix = np.delete(self.adjmatrix, vIndex, 1)
+            self.vertexlst.remove(vertex)
+
     # find the index of each vertex in the vertex list and use it to locate it in the adj matrix   
     def addEdge(self, edge):
         start_ind = self.vertexlst.index(edge.get_startv())
@@ -154,31 +187,39 @@ class Graph:
 # Given two graphs and threshold (float for the max dist acceptable between two matching points), find the corresponding points; return as list
 # TODO: an improved version would be one that minimizes total distance between all nodes
 def MatchPoints(g1, g2, threshold):
-    ver1 = g1.getVertexes()
-    ver2 = g2.getVertexes()
+    ver1 = copy.deepcopy(g1.getVertexes())
+    ver2 = copy.deepcopy(g2.getVertexes())
+
     matches = []
+
     # find two vertexes with min distance
     minDist = sys.maxint
     closestVertex = None
-    for v1 in ver1:
-        for v2 in ver2:
-            dist = v1.EuclidDist(v2)
-            print 'v1', v1.print_out(), 'v2', v2.print_out(), 'dist', dist
-            if dist < minDist:
-                minDist = dist
-                closestVertex = v2
-        if not closestVertex == None and minDist <= threshold:
-            matches.append((v1, closestVertex))
-            ver2.remove(v2)
-            ver1.remove(v1)
-        closestVertex = None
-        minDist = sys.maxint
+    while ver1:
+        for v1 in ver1:
+            if ver2:
+                for v2 in ver2:
+                    dist = v1.EuclidDist(v2)
+                    # print 'v1', v1.print_out(), 'v2', v2.print_out(), 'dist', dist
+                    if dist < minDist:
+                        minDist = dist
+                        closestVertex = v2
+                if closestVertex == None or minDist > threshold:
+                    print "THERE IS AN UNMATCHED VERTEX! "
+                    print v1.print_out()
+                if not closestVertex == None and minDist <= threshold:
+                    matches.append((v1, closestVertex))
+                    ver1.remove(v1)
+                    ver2.remove(closestVertex)  
+            closestVertex = None
+            minDist = sys.maxint
     return matches
         
 # TODO: Needs optimization from dynamic programming storage (can store if there is a path in an adj matrix and lay out the paths there)
-# TODO: test this!!
 # Find path between a pair of vertexes i and j of len length    
-def findPaths(iVertex, jVertex, length, graph, path):
+def findPathsWithoutLast(iVertex, jVertex, length, graph, path):
+    if length < 0:
+        raise Exception("path length cannot be < zero")
     if length == 0:
         if jVertex in graph.getNeighborVertexes(iVertex):
             path.append(iVertex)
@@ -186,13 +227,30 @@ def findPaths(iVertex, jVertex, length, graph, path):
         else:
             return []
     else:
+        # iterate through neighbors k of j and paths from i to k
         jNeighbors = graph.getNeighborVertexes(jVertex)
         for k in jNeighbors:
-            pathFound = findPaths(iVertex, k, length-1, graph, path)
-            if pathFound and not k in pathFound:
+            pathFound = findPathsWithoutLast(iVertex, k, length-1, graph, path)
+            if k in pathFound:
+                path = []
+                pathFound = []
+                continue
+            if not pathFound == []:
                  pathFound.append(k)
                  return pathFound
         return []
+
+# Find between vertex i and j, then append j to the path list
+def findPaths(iVertex, jVertex, length, graph, path):
+    pathFound = findPathsWithoutLast(iVertex, jVertex, length, graph, path)
+    if not pathFound == []:
+        if jVertex not in pathFound: 
+            pathFound.append(jVertex)
+    # Check to make sure that the path length adds up (i.e. 'length' vertexes are between 'i' and 'j')
+    if not len(pathFound) == length + 2:
+        pathFound = []
+    return pathFound
+
 
 # Given a graph, finds all paths in it up to length_limit length
 def findAllPaths(graph, length_limit=4):
@@ -201,40 +259,94 @@ def findAllPaths(graph, length_limit=4):
     pathsFound = []
 
     for length in range(length_limit + 1):
-        print "For length: " + str(length)
+        #print "For length: " + str(length)
         for v1 in range(numVertexes-1):
-            print "vertex from: "  + str(v1)
+            #print "vertex from: "  + str(v1+1)
             for v2 in range(v1 + 1, numVertexes):
-                print "vertex to: "  + str(v2)
+                # print "vertex to: "  + str(v2+1)
                 if v1 == v2:
                     continue
                 paths = []
                 paths = findPaths(vertexList[v1], vertexList[v2], length, graph, paths)
                 if not paths == []:
-                    paths.append(vertexList[v2]) # Add the last vertex in the path
                     pathsFound.append(paths)    # Save the paths
-                    for v in paths:
-                        print v.print_out()
+                    # for v in paths:
+                    #     print v.print_out()
     return pathsFound
+
+# Helper for finding matching paths. Takes vertex from g2 and finds the 
+#  equivalent from g1 by using matches found
+#TODO: TEST THIS
+def findVertexInMatches(vertex, matches, vertexes2):
+    index = vertexes2.index(vertex)
+    # print "List of vertexes2: "
+    # printVertexList(vertexes2)
+    # print "List of Matches: "
+    # printList(matches)
+    (vert1, _) = matches[index]
+    return vert1
+
+# Helpers for testing
+def printVertexList(lst):
+    for item in lst:
+        print item.print_out()
+def printList(lst):
+    for item in lst:
+        print item
 
 # Given graphs of letters, generates an "evolved" (averaged) graph
 def CrossOver(g1, g2):
-    matches = MatchPoints(g1, g2)
-    newGraph = Graph()
-    
-    # Generate average vertexes
-    for v1, v2 in matches:
-        newVertex = v1.avgVertex(v2)
-        newGraph.addVertex(newVertex)
-    
-    # Generate average edges
+    # Generate edges
     paths1 = findAllPaths(g1)
-    paths2 = findAllPaths(g2)
+    
+    # Make a graph with only the matched edges (to help us find all paths only with those vertexes)
+    newGraph = copy.deepcopy(g2)
+    
+    matches = MatchPoints(g1, newGraph, threshold=3)
 
-    # lay out all edges as in g1
-    # get common paths btw the 2: v1, v2 -> match[v1], match[v2]
-    # replace common ones on random 50% chance of replacement based on how many common paths found
+    # Pull out matched vertexes in graph 2
+    v2matches = []
+    for v1,v2 in matches:
+        v2matches.append(v2)
+    vertexes2 = g2.getVertexes()
 
+    # Remove vertexes not matched, update ones that were matched 
+    for v2 in vertexes2:
+        if v2 in v2matches:
+            # Get index into matches and change vertex to average of two matched v's
+            v2Index = v2matches.index(v2)
+            # TODO: TEST THIS!! - make sure changeVertex leaves vertexes2 and these equal
+            v2.changeVertex(matches[v2Index][0].avgVertex(v2))
+        else:
+            newGraph.removeVertex(v2) 
+    
+    # Find paths in the newGraph
+    paths2 = findAllPaths(newGraph)
+
+    # Replace paths in newGraph
+    p1_matches = []
+    for p2 in paths2:
+        p1 = []
+        for vertex2 in p2:
+            # Find equivalent vertex1 thru matches
+            vertex1 = findVertexInMatches(vertex2, matches, vertexes2)
+            # Append to matchPaths 
+            p1.append(vertex1)
+
+        p1_matches.append(p1)
+
+        # Find out whether p1 (or its reverse) exists in paths1
+        if p1 in paths1 or p1.reverse() in paths1:
+            # Replace common paths with 50% prob, based on how many common paths found
+            if random() < 0.5:
+                # edge for edge, add and delete
+                for i in range(len(p2) - 1):
+                    edge1 = g1.getEdge(p1[i], p1[i+1])
+                    edge1.set_endv(p2[i])
+                    edge1.set_startv(p2[i])
+                    newGraph.addEdge(edge1)
+
+        p1 = []
 
     return newGraph
 
