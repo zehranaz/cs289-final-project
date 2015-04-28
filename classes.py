@@ -316,8 +316,13 @@ def CrossOver(g1, g2):
             # Get index into matches and change vertex to average of two matched v's
             v2Index = v2matches.index(v2)
             # TODO: TEST THIS!! - make sure changeVertex leaves vertexes2 and these equal
+            print "CHANGED v2 from ",
+            print v2.print_out(),
+            print " to ",
             v2.changeVertex(matches[v2Index][0].avgVertex(v2))
+            print v2.print_out()
         else:
+            print "REMOVING A VERTEX"
             newGraph.removeVertex(v2) 
     
     # Find paths in the newGraph
@@ -337,15 +342,24 @@ def CrossOver(g1, g2):
 
         # Find out whether p1 (or its reverse) exists in paths1
         if p1 in paths1 or p1.reverse() in paths1:
+            print "Found this path: "
+            printVertexList(p1)
+            print "Inside these found paths: "
+            for item in paths1:
+                print "Path = "
+                printVertexList(item)
             # Replace common paths with 50% prob, based on how many common paths found
             if random() < 0.5:
                 # edge for edge, add and delete
                 for i in range(len(p2) - 1):
+                    print "Changing Edge from "
                     edge1 = g1.getEdge(p1[i], p1[i+1])
-                    edge1.set_endv(p2[i])
-                    edge1.set_startv(p2[i])
-                    newGraph.addEdge(edge1)
+                    print edge1.print_out(), " to ",
 
+                    edge1.set_startv(p2[i])
+                    edge1.set_endv(p2[i+1])
+                    print edge1.print_out()
+                    newGraph.addEdge(edge1)
         p1 = []
 
     return newGraph
