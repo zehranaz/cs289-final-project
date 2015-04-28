@@ -282,7 +282,7 @@ def build_graph(im, fbasename):
 
     # save to file
     fig1 = plt.gcf()
-    plt.imshow(imdup)
+    plt.imshow(imdup, cmap='Greys')
     plt.draw()
     fig1.savefig(fbasename + "_graph.jpg")
     
@@ -323,14 +323,14 @@ def produce_graphs(char_indices, person_indices, jobtype):
 
 
 def main_victoria():
-    char_indices = [11, 12, 9, 5]
+    char_indices = [11, 12, 9, 5, 18]
     person_indices = range(1, 10)
     
     # produce graphs for each character
     graphs = produce_graphs(char_indices, person_indices, "coords")
 
     # evaluate fitness between one graph and all other graphs
-    test_char_indices = [11, 12, 9, 5]
+    test_char_indices = [11, 12, 9, 5, 18]
     test_person_indices = range(0, 9)
     correct_classifications = defaultdict(int)
 
