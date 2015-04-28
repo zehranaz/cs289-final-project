@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from classes import Graph, Edge, Vertex, MatchPoints, findPaths, findAllPaths
+from classes import Graph, Edge, Vertex, MatchPoints, findPaths, findAllPaths, CrossOver
 from random import randint
 from collections import defaultdict
 import matplotlib.pyplot as plt
@@ -10,6 +10,7 @@ import os.path
 import copy
 import sys
 import math
+import copy
 
 def unit_vector(vector):
     """ Returns the unit vector of the vector.  """
@@ -131,6 +132,21 @@ def testMatch(g1=None, g2=None):
         print "(", v1.print_out(), v2.print_out(), ")",
     return matches
 
+def testRemoveVertex():
+    graph = makeSpecificGraph()
+    graph2 = copy.deepcopy(graph)
+    print "Before: "
+    graph.print_graph()    
+    vertexToRemove = graph.getVertexes() [1]
+    graph.removeVertex(vertexToRemove)
+    print "After: "
+    graph.print_graph()
+    print "Copyed Graph "
+    graph2.print_graph()
+
+def testCopy():
+    graph
+
 def testFindPaths():
     # Set up graph
     graph = makeSpecificGraph()
@@ -167,18 +183,21 @@ def testFindPaths():
     #         print v.print_out(), 
     #     #print allPaths[path]
 
-def testMating():
-    g1 = makeTestGraph()
-    g2 = makeTestGraph()
-    matches = testMatch(g1, g2)
-    newGraph = GenerateNewLetter(g1, g2, matches)
-    newGraph.print_vertexlst()
+def testCrossover():
+    g1 = makeSpecificGraph()
+    g2 = makeSpecificGraph()
+    # Since this makes the same graph, CrossOver should return same thing
+    newGraph = CrossOver(g1, g2)
+    newGraph.print_graph()
 
+    print "Old Graph = "
+    g1.print_graph()
 
 def main():
-    testFindPaths()
+    testCrossover()
+    #testRemoveVertex()
+    #testFindPaths()
     #testGetNeighbors()
-
 
 # walk through image diagonally until see something black
 def find_start(im, nrow, ncol):
@@ -196,7 +215,6 @@ def find_start(im, nrow, ncol):
     # print 'start box', im[rowi][coli] # should be nonzero now
     # print 'start index', rowi, coli
     return [currentrow, currentcol]
-
 
 # return coordinates of next pixel to go to in neighborhood
 def check_neighborhood(im, nrow, ncol, currentrow, currentcol, r, prev_visited):
