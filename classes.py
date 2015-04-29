@@ -204,9 +204,9 @@ def MatchPoints(g1, g2, threshold):
                     if dist < minDist:
                         minDist = dist
                         closestVertex = v2
-                if closestVertex == None or minDist > threshold:
-                    print "THERE IS AN UNMATCHED VERTEX! "
-                    print v1.print_out()
+                # if closestVertex == None or minDist > threshold:
+                #     print "THERE IS AN UNMATCHED VERTEX! "
+                #     print v1.print_out()
                 if not closestVertex == None and minDist <= threshold:
                     matches.append((v1, closestVertex))
                     ver1.remove(v1)
@@ -259,30 +259,20 @@ def findAllPaths(graph, length_limit=4):
     pathsFound = []
 
     for length in range(length_limit + 1):
-        #print "For length: " + str(length)
         for v1 in range(numVertexes-1):
-            #print "vertex from: "  + str(v1+1)
             for v2 in range(v1 + 1, numVertexes):
-                # print "vertex to: "  + str(v2+1)
                 if v1 == v2:
                     continue
                 paths = []
                 paths = findPaths(vertexList[v1], vertexList[v2], length, graph, paths)
                 if not paths == []:
                     pathsFound.append(paths)    # Save the paths
-                    # for v in paths:
-                    #     print v.print_out()
     return pathsFound
 
 # Helper for finding matching paths. Takes vertex from g2 and finds the 
 #  equivalent from g1 by using matches found
-#TODO: TEST THIS
 def findVertexInMatches(vertex, matches, vertexes2):
     index = vertexes2.index(vertex)
-    # print "List of vertexes2: "
-    # printVertexList(vertexes2)
-    # print "List of Matches: "
-    # printList(matches)
     (vert1, _) = matches[index]
     return vert1
 
@@ -315,10 +305,6 @@ def CrossOver(g1, g2):
         if v2 in v2matches:
             # Get index into matches and change vertex to average of two matched v's
             v2Index = v2matches.index(v2)
-            # TODO: TEST THIS!! - make sure changeVertex leaves vertexes2 and these equal
-            print "CHANGED v2 from ",
-            print v2.print_out(),
-            print " to ",
             v2.changeVertex(matches[v2Index][0].avgVertex(v2))
             print v2.print_out()
         else:
@@ -329,36 +315,25 @@ def CrossOver(g1, g2):
     paths2 = findAllPaths(newGraph)
 
     # Replace paths in newGraph
-    p1_matches = []
     for p2 in paths2:
         p1 = []
         for vertex2 in p2:
             # Find equivalent vertex1 thru matches
-            vertex1 = findVertexInMatches(vertex2, matches, vertexes2)
+            vertex1 = findVertexInMatches(vertex2, matches, v2matches)
             # Append to matchPaths 
             p1.append(vertex1)
 
-        p1_matches.append(p1)
-
         # Find out whether p1 (or its reverse) exists in paths1
         if p1 in paths1 or p1.reverse() in paths1:
-            print "Found this path: "
-            printVertexList(p1)
-            print "Inside these found paths: "
-            for item in paths1:
-                print "Path = "
-                printVertexList(item)
             # Replace common paths with 50% prob, based on how many common paths found
             if random() < 0.5:
                 # edge for edge, add and delete
+                #TODO: Might have to change i and i+1 around to fit if reverse path is found.
                 for i in range(len(p2) - 1):
-                    print "Changing Edge from "
                     edge1 = g1.getEdge(p1[i], p1[i+1])
-                    print edge1.print_out(), " to ",
 
                     edge1.set_startv(p2[i])
                     edge1.set_endv(p2[i+1])
-                    print edge1.print_out()
                     newGraph.addEdge(edge1)
         p1 = []
 
