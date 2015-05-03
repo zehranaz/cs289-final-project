@@ -185,11 +185,17 @@ def testFindPaths():
 
 def testCrossover():
     g1 = makeTestGraph(10)
+    print "g1 numvertices = ", len(g1.getVertexes())
+    g1.print_graph()
     g2 = makeTestGraph(10)
+    print "g2 numvertices = ", len(g2.getVertexes())
+    g2.print_graph()
     # Since this makes the same graph, CrossOver should return same thing
     
     newGraph = CrossOver(g1, g2)
+    print "New Graph = ", len(newGraph.getVertexes())
     newGraph.print_graph()
+    print "end New Graph"
 
     print "Old Graph = "
     g1.print_graph()
@@ -268,14 +274,28 @@ def traverse(im, graph, nrow, ncol, currentrow, currentcol, r, imdup, prev_verte
 def fitness_between_nodes(g1, g2, threshold):
     matching_vertices = MatchPoints(g1, g2, threshold)
     # if insufficient number of points matched
-    print 'number of matching nodes', len(matching_vertices), g1.numVertices()
-    if len(matching_vertices) < g1.numVertices():
-        print 'too few matches'
-        return sys.maxint
-    sum_of_distances = 0.
+    print 'number of matching nodes', len(matching_vertices), 'out of ', min(g1.numVertices(), g2.numVertices())
+    # if len(matching_vertices) < min(g1.numVertices(), g2.numVertices()):
+    #     print 'too few matches'
+    #     threshold = max(2*threshold, sys.maxint)
+    #     return fitness_between_nodes(g1, g2, threshold)
+    sum_of_distances = 1.
     for (v1, v2) in matching_vertices:
         sum_of_distances += v1.EuclidDist(v2)
-    return math.sqrt(sum_of_distances)
+    # if sum_of_distances < .00001:
+        # print "g1"
+        # g1.print_graph()
+        # print "g2"
+        # g2.print_graph()
+        # print "matching vertices", len(matching_vertices)
+        # for (v1, v2) in matching_vertices:
+        #     print "v1", v1.print_out(), "; v2", v2.print_out(), "; dist= ", v1.EuclidDist(v2)
+        # print "end printout of matching vertices"
+    max_possible_matches = min(g1.numVertices(), g2.numVertices())
+    num_matching = float(max(len(matching_vertices), .001))
+    weighted = ( max_possible_matches / num_matching ) * (1+math.exp(20-num_matching))
+    print "weight=", weighted, ", sum_of_distances=", sum_of_distances, ", together=", weighted * sum_of_distances
+    return weighted * sum_of_distances
 
 def build_graph(im, fbasename):
     # get image dimensions
@@ -343,19 +363,19 @@ def produce_graphs(char_indices, person_indices, jobtype):
 
 def main_victoria():
     char_indices = [11, 12, 9, 5, 18]
-    person_indices = range(1, 10)
+    person_indices = range(1, 10) # not zero-indexed
     
     # produce graphs for each character
     graphs = produce_graphs(char_indices, person_indices, "coords")
 
     # evaluate fitness between one graph and all other graphs
     test_char_indices = [11, 12, 9, 5, 18]
-    test_person_indices = range(0, 9)
+    test_person_indices = range(1, 10) # not zero-indexed
     correct_classifications = defaultdict(int)
 
     for test_char_index in test_char_indices:
         for test_person_index in test_person_indices:
-            test_graph = graphs[test_char_index][test_person_index]
+            test_graph = graphs[test_char_index][test_person_index-1]
             closest_char = None
             min_fitness_val = sys.maxint
             print 'classifying character', test_char_index, 'by person', test_person_index
@@ -364,7 +384,7 @@ def main_victoria():
                     if not (char_index == test_char_index and person_index == test_person_index):
                         g1 = test_graph
                         g2 = graphs[char_index][person_index-1]
-                        fitness = fitness_between_nodes(g1, g2, 3000)
+                        fitness = fitness_between_nodes(g1, g2, 30)
                         if fitness < min_fitness_val:
                             min_fitness_val = fitness
                             closest_char = char_index

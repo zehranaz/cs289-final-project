@@ -184,7 +184,7 @@ class Graph:
     def print_graph (self):
         print "Graph"
         self.print_vertexlst()
-        self.print_adjmatrix()
+        # self.print_adjmatrix()
 
 
 # Given two graphs and threshold (float for the max dist acceptable between two matching points), find the corresponding points; return as list
@@ -299,7 +299,8 @@ def CrossOver(g1, g2):
     # Make a graph with only the matched edges (to help us find all paths only with those vertexes)
     newGraph = copy.deepcopy(g2)
     
-    matches = MatchPoints(g1, newGraph, threshold=3)
+    matches = MatchPoints(g1, newGraph, threshold=sys.maxint)
+    print "number of matches: ", len(matches)
 
     # Pull out matched vertexes in graph 2
     v2matches = []
