@@ -364,7 +364,7 @@ def main_victoria():
                     if not (char_index == test_char_index and person_index == test_person_index):
                         g1 = test_graph
                         g2 = graphs[char_index][person_index-1]
-                        fitness = fitness_between_nodes(g1, g2, sys.maxint)
+                        fitness = fitness_between_nodes(g1, g2, 3000)
                         if fitness < min_fitness_val:
                             min_fitness_val = fitness
                             closest_char = char_index

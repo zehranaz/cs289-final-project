@@ -198,21 +198,25 @@ def MatchPoints(g1, g2, threshold):
     # find two vertexes with min distance
     minDist = sys.maxint
     closestVertex = None
-    while ver1:
+    while ver1 and ver2:
+        # print "in while:", len(ver1), len(ver2)
         for v1 in ver1:
+            # print "in for v1 in ver1:", len(ver1), len(ver2)
             if ver2:
                 for v2 in ver2:
+                    # print "in for v2 in ver2:", len(ver2)
                     dist = v1.EuclidDist(v2)
                     # print 'v1', v1.print_out(), 'v2', v2.print_out(), 'dist', dist
                     if dist < minDist:
                         minDist = dist
                         closestVertex = v2
-                # if closestVertex == None or minDist > threshold:
-                #     print "THERE IS AN UNMATCHED VERTEX! "
-                #     print v1.print_out()
+                if closestVertex == None or minDist > threshold:
+                    ver1.remove(v1)
+                    # print "THERE IS AN UNMATCHED VERTEX! ", v1.print_out()
                 if not closestVertex == None and minDist <= threshold:
                     matches.append((v1, closestVertex))
                     ver1.remove(v1)
+                    # print "removed v1"
                     ver2.remove(closestVertex)  
             closestVertex = None
             minDist = sys.maxint
