@@ -184,9 +184,10 @@ def testFindPaths():
     #     #print allPaths[path]
 
 def testCrossover():
-    g1 = makeSpecificGraph()
-    g2 = makeSpecificGraph()
+    g1 = makeTestGraph(10)
+    g2 = makeTestGraph(10)
     # Since this makes the same graph, CrossOver should return same thing
+    
     newGraph = CrossOver(g1, g2)
     newGraph.print_graph()
 
