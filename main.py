@@ -274,12 +274,13 @@ def traverse(im, graph, nrow, ncol, currentrow, currentcol, r, imdup, prev_verte
 def fitness_between_nodes(g1, g2, threshold):
     matching_vertices = MatchPoints(g1, g2, threshold)
     # if insufficient number of points matched
-    print 'number of matching nodes', len(matching_vertices), 'out of ', min(g1.numVertices(), g2.numVertices())
+    print 'number of matching nodes', len(matching_vertices), 'out of ', max(g1.numVertices(), g2.numVertices())
     # if len(matching_vertices) < min(g1.numVertices(), g2.numVertices()):
     #     print 'too few matches'
     #     threshold = max(2*threshold, sys.maxint)
     #     return fitness_between_nodes(g1, g2, threshold)
     sum_of_distances = 1.
+    max_vertices = max(g1.numVertices(), g2.numVertices())
     for (v1, v2) in matching_vertices:
         sum_of_distances += v1.EuclidDist(v2)
     # if sum_of_distances < .00001:
@@ -293,7 +294,7 @@ def fitness_between_nodes(g1, g2, threshold):
         # print "end printout of matching vertices"
     max_possible_matches = min(g1.numVertices(), g2.numVertices())
     num_matching = float(max(len(matching_vertices), .001))
-    weighted = ( max_possible_matches / num_matching ) * (1+math.exp(20-num_matching))
+    weighted = ( max_vertices / num_matching ) * (1+math.exp(max_vertices/2-num_matching)) # high weight unless over 20 matching
     print "weight=", weighted, ", sum_of_distances=", sum_of_distances, ", together=", weighted * sum_of_distances
     return weighted * sum_of_distances
 
@@ -362,14 +363,14 @@ def produce_graphs(char_indices, person_indices, jobtype):
 
 
 def main_victoria():
-    char_indices = [11, 12, 9, 5, 18]
+    char_indices = [11, 12, 9] # 5, 18
     person_indices = range(1, 10) # not zero-indexed
     
     # produce graphs for each character
     graphs = produce_graphs(char_indices, person_indices, "coords")
 
     # evaluate fitness between one graph and all other graphs
-    test_char_indices = [11, 12, 9, 5, 18]
+    test_char_indices = [11, 12, 9] # 5, 18
     test_person_indices = range(1, 10) # not zero-indexed
     correct_classifications = defaultdict(int)
 
@@ -391,6 +392,7 @@ def main_victoria():
                         print person_index, char_index, fitness
             print 'classification of character', test_char_index, 'by person', \
                     test_person_index, 'is', closest_char, 'with fitness', min_fitness_val
+            print "\n\n"
             if closest_char == test_char_index:
                 correct_classifications[test_char_index] += 1
     for char,num_correct in correct_classifications.items():
