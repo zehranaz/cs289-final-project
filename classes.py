@@ -73,6 +73,9 @@ class Graph:
             if v == vertex:
                 return True
         return False
+
+    def numVertices(self):
+        return len(self.vertexlst)
         
     def getVertexes (self):
         return self.vertexlst

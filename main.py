@@ -361,8 +361,8 @@ def main_victoria():
             for char_index in char_indices:
                 for person_index in person_indices:
                     if not (char_index == test_char_index and person_index == test_person_index):
-                        g1 = copy.deepcopy(test_graph)
-                        g2 = copy.deepcopy(graphs[char_index][person_index-1])
+                        g1 = test_graph
+                        g2 = graphs[char_index][person_index-1]
                         fitness = fitness_between_nodes(g1, g2, sys.maxint)
                         if fitness < min_fitness_val:
                             min_fitness_val = fitness
@@ -377,4 +377,4 @@ def main_victoria():
 
 
 if __name__ == "__main__":
-    main()
+    main_victoria()
