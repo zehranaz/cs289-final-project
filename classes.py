@@ -146,11 +146,11 @@ class Graph:
 
     # Takes a vertex and removes it.
     def removeVertex(self, vertex):
-        print "REMOVING VERTEX: ",
-        print vertex
+        #print "REMOVING VERTEX: ",
+        #print vertex
         vIndex = self.getIndexOfVertex(vertex)
-        print "VINDEX = " + str(vIndex) + " and vertex = ",
-        print vertex.print_out()
+        #print "VINDEX = " + str(vIndex) + " and vertex = ",
+        #print vertex.print_out()
         if vIndex:
             self.adjmatrix = np.delete(self.adjmatrix, vIndex, 0)
             self.adjmatrix = np.delete(self.adjmatrix, vIndex, 1)
@@ -280,6 +280,13 @@ def findAllPaths(graph, length_limit=4):
 #  equivalent from g1 by using matches found
 def findVertexInMatches(vertex, matches, vertexes2):
     index = vertexes2.index(vertex)
+    
+    v2matches = []
+    for v1, v2 in matches:
+        v2matches.append(v2)
+    if not vertex in v2matches:
+        print "VERTEX NOT FOUND"
+    
     (vert1, _) = matches[index]
     return vert1
 
@@ -292,14 +299,14 @@ def printList(lst):
         print item
 
 # Given graphs of letters, generates an "evolved" (averaged) graph
-def CrossOver(g1, g2):
+def CrossOver(g1, g2, threshold=5):
     # Generate edges
     paths1 = findAllPaths(g1)
     
     # Make a graph with only the matched edges (to help us find all paths only with those vertexes)
     newGraph = copy.deepcopy(g2)
     
-    matches = MatchPoints(g1, newGraph, threshold=5)
+    matches = MatchPoints(g1, newGraph, threshold)
     print "number of matches: ", len(matches)
 
     # Pull out matched vertexes in graph 2

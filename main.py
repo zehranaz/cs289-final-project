@@ -374,7 +374,6 @@ def produce_graphs(char_indices, person_indices, jobtype):
     else:
         return produce_graphs(char_indices, person_indices, "graph")
 
-
 def main_victoria():
     # training set against which we classify
     char_indices = [11, 12, 9, 5, 18] # 5, 18
@@ -382,6 +381,10 @@ def main_victoria():
     
     # produce graphs for each character
     graphs = produce_graphs(char_indices, person_indices, "coords")
+    
+    # add crossovers to graphs matrix
+    generate_crossovers(char_indices, person_indices)
+    graphs = append_crossovers(graphs, char_indices, person_indices)
 
     # evaluate fitness between one graph and all other graphs
     # characters to be classified
@@ -402,7 +405,7 @@ def main_victoria():
                     if not (char_index == test_char_index and person_index == test_person_index):
                         g1 = test_graph
                         g2 = graphs[char_index][person_index-1]
-                        
+
                         # find closest matching characters by minimizing fitness function
                         fitness = fitness_between_nodes(g1, g2, 30)
                         if fitness < min_fitness_val:
@@ -433,27 +436,55 @@ def read_graph_from_file(filename):
     pkl_file.close()
     return graph
 
+def get_crossed_filename(p1index, p2index, char):
+    return "000" + str(p1index) + "_000" + str(p2index) + "_" + str(char)
+
+
+#TODO: Find the bug here that prevents from getting all specified crossovers
 def generate_crossovers(char_index_pool, person_index_pool):
     # get dictionary of graphs indexed by character index and then person index
     graphPool = produce_graphs(char_index_pool, person_index_pool, "coords")
     num_chars = len(char_index_pool)
     num_persons = len(person_index_pool)
+    print person_index_pool, " with total people ", num_persons
 
     # find pairs to crossover
     # generate crossovers for all appropriate pairs
     for char in char_index_pool:
         for i in range(num_persons-1):
-            for j in range(i+1, num_persons-1):
+            for j in range(i+1, num_persons):
+                # print "char is = ", char
+                # print "first graph is at index ", i, " is person ", person_index_pool[i], " in data "
+                # print "second graph is at index ", j, " is person ", person_index_pool[j], "in data "
                 graph1 = graphPool[char][person_index_pool[i]]
                 
-                print "Doing person at i = " + str(i) + " " + str(person_index_pool[i]) 
-                print "Doing person at j = " + str(j) + " " + str(person_index_pool[j]) 
-                print person_index_pool
+                # print "Doing person at i = " + str(i) + " " + str(person_index_pool[i]) 
+                # print "Doing person at j = " + str(j) + " " + str(person_index_pool[j]) 
+                # print person_index_pool
                 graph2 = graphPool[char][person_index_pool[j]]
-                new_graph = CrossOver(graph1, graph2)
+                new_graph = CrossOver(graph1, graph2, 7)
                 #new_graph.print_graph()
                 # save to file
-                save_graph_to_file(new_graph, "000" + str(person_index_pool[i]) + "_" + str(char))
+                save_graph_to_file(new_graph, graph_name= get_crossed_filename(person_index_pool[i], person_index_pool[j], char))
+
+
+# Given a char and person index, return name of file
+# e.g. get_name_for_file(12, 23) = 00023_12
+def get_name_for_file(char_index, person_index):
+    return "000" + str(person_index) + "_" + str(char_index)
+
+# Given a matrix of graphs indexed by characters and persons, 
+#   add in crossed over graphs specified by char_indices and person indices 
+def append_crossovers(graphs, char_indices, person_indices):
+    for person in person_indices:
+        for char in char_indices:
+            try:
+                graph = read_graph_from_file(get_crossed_filename(char, person) + ".pkl")
+            except IOError:
+                # TODO: actually do crossover
+                pass 
+            graphs[char].append(graph)
+    return graphs
 
 def test_gen_crossovers():
     # get graphs for each of the chars for each of the peresons in the pool
@@ -470,6 +501,7 @@ def test_read_crossovers():
             graph.print_graph()
 
 if __name__ == "__main__":
-    #test_gen_crossovers()
-    test_read_crossovers()
+    #main_victoria()
+    test_gen_crossovers()
+    #test_read_crossovers()
 
