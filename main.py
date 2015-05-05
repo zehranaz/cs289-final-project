@@ -277,7 +277,7 @@ def traverse(im, graph, nrow, ncol, currentrow, currentcol, r, imdup, prev_verte
     for pt in pts_to_traverse:
         traverse(im, graph, nrow, ncol, pt[0], pt[1], r, imdup, prev_vertex, prev_visited)
 
-    return  
+    return imdup 
 
 def fitness_between_nodes(g1, g2, threshold):
     matching_vertices = MatchPoints(g1, g2, threshold)
@@ -442,16 +442,34 @@ def generate_crossovers(char_index_pool, person_index_pool):
     # find pairs to crossover
     # generate crossovers for all appropriate pairs
     for char in char_index_pool:
-        for i in range(num_persons - 1):
-            for j in range(i+1, num_persons):
+        for i in range(num_persons-1):
+            for j in range(i+1, num_persons-1):
                 graph1 = graphPool[char][person_index_pool[i]]
+                
+                print "Doing person at i = " + str(i) + " " + str(person_index_pool[i]) 
+                print "Doing person at j = " + str(j) + " " + str(person_index_pool[j]) 
+                print person_index_pool
                 graph2 = graphPool[char][person_index_pool[j]]
                 new_graph = CrossOver(graph1, graph2)
-                new_graph.print_graph()
+                #new_graph.print_graph()
                 # save to file
-                save_graph_to_file(new_graph, str("000" + person_index_pool[i]) + "_" + str(char))
+                save_graph_to_file(new_graph, "000" + str(person_index_pool[i]) + "_" + str(char))
 
+def test_gen_crossovers():
+    # get graphs for each of the chars for each of the peresons in the pool
+    chars = [11]
+    persons = range(1,10)
+    generate_crossovers(chars, persons)
+
+def test_read_crossovers():
+    chars = [11]
+    persons = range(1,8)
+    for char in chars:
+        for person in persons:
+            graph = read_graph_from_file("000" + str(person) + "_" + str(char) + ".pkl")
+            graph.print_graph()
 
 if __name__ == "__main__":
-    graph_readings_tests()
+    #test_gen_crossovers()
+    test_read_crossovers()
 

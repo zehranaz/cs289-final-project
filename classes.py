@@ -314,9 +314,9 @@ def CrossOver(g1, g2):
             # Get index into matches and change vertex to average of two matched v's
             v2Index = v2matches.index(v2)
             v2.changeVertex(matches[v2Index][0].avgVertex(v2))
-            print v2.print_out()
+            #print v2.print_out()
         else:
-            print "REMOVING A VERTEX"
+            #print "REMOVING A VERTEX"
             newGraph.removeVertex(v2) 
     
     # Find paths in the newGraph
