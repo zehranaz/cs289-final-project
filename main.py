@@ -541,8 +541,37 @@ def get_name_for_file(char_index, person_index):
 def test_gen_crossovers():
     # get graphs for each of the chars for each of the peresons in the pool
     chars = [11]
-    persons = range(1,5)
+    persons = range(1,10)
     generate_crossovers(chars, persons)
+    # graph = makeSpecificGraph()
+    # result = CrossOver(graph, graph)
+    # print "result="
+    # result.print_graph()
+
+def output_graph(graph):
+    vstr = ""
+    vertices = graph.getVertexes()
+    for i, vertex in enumerate(vertices):
+        vstr += "(" + str(vertex.get_x()) + "," + str(vertex.get_y()) + ")"
+        if i != len(vertices)-1:
+            vstr += ","
+    print vstr
+    adjMatrix = graph.getAdjMatrix()
+    res = ""
+    for j, row in enumerate(adjMatrix):
+        res += "{"
+        for i, item in enumerate(row):
+            if item == None:
+                res += str(0)
+            else:
+                res += str(1)
+            if i != len(row)-1:
+                res += ","
+        res += "}"
+        if j != len(adjMatrix)-1:
+            res += ","
+    print res
+
 
 def test_read_crossovers():
     chars = [11]
@@ -553,9 +582,21 @@ def test_read_crossovers():
             graph.print_graph()
 
 if __name__ == "__main__":
+
     #generate_fitness_plot(11, 3, [11,12,9], range(1,10), 30)
     #test_gen_crossovers()
     main_victoria()
+    """
+    chars = [11]
+    persons = range(1,5)
+    num_persons = len(persons)
+    graphs = produce_graphs(chars, persons, "coords")
+    for char in chars:
+        for i in range(num_persons-1):
+            graph = graphs[char][persons[i]-1]
+            output_graph(graph)
+    """
+    # test_gen_crossovers()
     #test_read_crossovers()
     #testCrossovers()
 
