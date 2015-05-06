@@ -3,6 +3,8 @@ import os.path
 import numpy as np
 import matplotlib.pyplot as plt
 from classes import Graph, Vertex, Edge
+import coords_to_img
+import thinning
 
 # walk through image diagonally until see something black
 def find_start(im, nrow, ncol):

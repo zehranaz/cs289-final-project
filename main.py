@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # custom code
-import coords_to_img # offline to online
-import thinning
 from classes import Graph, CrossOver
 from bmp_to_graphs import produce_graphs
-from classify import fitness_between_nodes, all_to_all_classification
+from classify import all_to_all_classification
+from crossover import generate_crossovers_from_graphs
 
-def main_victoria():
+def main():
     # training set against which we classify
     char_indices = [11, 12, 9] # 5, 18
     person_indices = range(1, 5) # not zero-indexed
@@ -39,5 +38,5 @@ def main_victoria():
     return
 
 if __name__ == "__main__":
-    main_victoria()
+    main()
 

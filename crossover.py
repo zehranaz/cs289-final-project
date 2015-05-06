@@ -1,4 +1,5 @@
 import pickle
+from classes import CrossOver
 
 # takes in a graph_name and writes out graph to graph_name.pkl
 def save_graph_to_file(graph, graph_name):
