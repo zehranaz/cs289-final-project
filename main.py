@@ -318,35 +318,6 @@ def fitness_between_nodes(g1, g2, threshold):
     # print "SF=", scale_factor, ", sum=", sum_of_distances, ", penalty=", penalty, " final=", scale_factor * penalty * sum_of_distances
     
     return scale_factor * penalty * sum_of_distances
-
-def generate_fitness_plot(specific_char, specific_person, char_indices, person_indices, threshold):
-    
-    # produce graphs for each character
-    graphs = produce_graphs(char_indices, person_indices, "coords")
-    test_graph = graphs[specific_char][specific_person-1]
-    print 'classifying character', specific_char, 'by person', specific_person
-    fitnesses = []
-    # classify character test_char by test_person
-    for char_index in char_indices:
-        for person_index in person_indices:
-            if not (char_index == specific_char and person_index == specific_person):
-                g1 = test_graph
-                g2 = graphs[char_index][person_index-1]
-
-                # find closest matching characters by minimizing fitness function
-                fitness = fitness_between_nodes(g1, g2, threshold)
-                fitnesses.append((char_index, fitness))
-                print person_index, char_index, fitness
-    fzip = zip(*fitnesses)
-    chars = list(fzip[0])
-    fits = list(fzip[1])
-    plt.scatter(chars, fits)
-    plt.semilogy()
-    plt.axis(xmin = 8, xmax = 15)
-    plt.title("Fitness Classified")
-    plt.xlabel("Character Index")
-    plt.ylabel("Fitness")
-    plt.show()
     
 
 # Build Graph from image, save plot of graph to file, return graph
