@@ -509,8 +509,8 @@ def test_read_crossovers():
             graph.print_graph()
 
 if __name__ == "__main__":
-    main_victoria()
-    #test_gen_crossovers()
+    #main_victoria()
+    test_gen_crossovers()
     #test_read_crossovers()
     #testCrossovers()
 
