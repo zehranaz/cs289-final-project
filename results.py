@@ -2,6 +2,7 @@ from bmp_to_graphs import produce_graphs
 from classify import fitness_between_nodes
 from crossover import generate_crossovers_from_graphs
 import matplotlib.pyplot as plt
+import sys
 
 # Use this file for pulling out results. 
 
@@ -38,16 +39,13 @@ def generate_fitness_plot(specific_char, specific_person, char_indices, person_i
     return fzip
 
 def make_fitness_plot(doCrossover=False):
-	c_chars = [9, 11, 12]
+	c_chars = [int(sys.argv[1])]
 	c_person = 1
 	char_list = [11, 12, 9]
 	person_list = range(1,5)
 	threshold = 30
 
-	x = []
-	y = []
-
-	for char in char_list:
+	for char in c_chars:
 		print "Comapring char " + str(char) + " by person " + str(c_person) + " with Crossover = " + str(doCrossover)
 		
 		fits = generate_fitness_plot(char, c_person, char_list, person_list, threshold, doCrossover)
@@ -56,9 +54,9 @@ def make_fitness_plot(doCrossover=False):
 		print "Fitness list is: "
 		print y
 
-		for i, x_1 in enumerate(x):
-			if x_1 == 11:
-				print "This is the (11, 0) point's fitness", y[i]
+		# for i, x_1 in enumerate(x):
+		# 	if x_1 == 11:
+		# 		print "This is the (11, 0) point's fitness", y[i]
 
 		plt.title("Char " + str(char) + " Comparison")
 		if doCrossover:
@@ -69,12 +67,10 @@ def make_fitness_plot(doCrossover=False):
 		plt.semilogy()
 		#plt.yscale("linear")
 		#plt.autoscalex_on(False)
-		plt.axis(xmin = min(char_list)-1, xmax = max(char_list) + 1, ymin=0, ymax=10000)
+		plt.axis(xmin = min(char_list)-1, xmax = max(char_list) + 1, ymin=0, ymax=1000000)
 		plt.savefig("writeup/char_" + str(char)+ "_classification")
 		#plt.show()
 
-		x = []
-		y = []
 
 
 if __name__ == "__main__":
