@@ -32,7 +32,9 @@ def main():
     # add the crossover indices to the pool of all_person_indices to be tested
     all_person_indices = []
     for char in graph_pool:
-        all_person_indices += graph_pool[char].keys()
+        for key in graph_pool[char]:
+            if key not in all_person_indices:
+                all_person_indices.append(key)
 
     all_to_all_classification(all_char_indices, all_person_indices, test_char_indices, test_person_indices, graph_pool)
     return

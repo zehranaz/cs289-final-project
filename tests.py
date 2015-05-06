@@ -1,9 +1,30 @@
+import os
+import networkx as nx
+import pylab as plt
+import numpy as np
 from classes import Graph, Edge, Vertex, MatchPoints, findPaths, findAllPaths, CrossOver
 from random import randint
 from crossover import read_graph_from_file
 from bmp_to_graphs import produce_graphs
 
-def output_graph(graph):
+def format_graph_output_arr(graph):
+    vlist = []
+    vertices = graph.getVertexes()
+    for vertex in vertices:
+        vlist.append([vertex.get_y(), vertex.get_x()])
+    adjMatrix = graph.getAdjMatrix()
+    newMatrix = []
+    for row in adjMatrix:
+        newRow = []
+        for item in row:
+            if item == None:
+                newRow.append(0)
+            else:
+                newRow.append(1)
+        newMatrix.append(newRow)
+    return vlist, newMatrix
+
+def format_graph_output_str(graph):
     vstr = ""
     vertices = graph.getVertexes()
     for i, vertex in enumerate(vertices):
@@ -27,18 +48,32 @@ def output_graph(graph):
             res += ","
     print res
 
-def output_graphs():
-    chars = [11]
-    persons = range(1,5)
+def draw_graph_networks(chars, persons):
     num_persons = len(persons)
+    directory = "lao_graphs"
+    if not os.path.exists(directory):
+        os.makedirs(directory)
     graphs = produce_graphs(chars, persons, "coords")
-    for char in chars:
-        for i in range(num_persons-1):
-            graph = graphs[char][persons[i]-1]
-            output_graph(graph)
+    for char in graphs:
+        for person in graphs[char]:
+            outfile = directory+"/"+str(char)+"_"+str(person)+".jpg"
+            if os.path.isfile(outfile):
+                continue
+            graph = graphs[char][person]
+            vlist, adjMatrix = format_graph_output_arr(graph)
+            A = np.array(adjMatrix)
+            G = nx.Graph(A)
+            fig = plt.figure()
+            ax = plt.gca()
+            ax.invert_yaxis()
+            pos = vlist
+            nx.draw(G,pos,node_size=20)
+            fig.savefig(outfile)
+            plt.close()
+
 
 def test_read_crossovers():
-    chars = [11]
+    chars = [9]
     persons = range(1,8)
     for char in chars:
         for person in persons:
@@ -213,11 +248,14 @@ def graph_readings_tests():
     graph.print_graph()
 
 def main():
-    #testMatch()
-    testCrossover()
-    #testRemoveVertex()
-    #testFindPaths()
-    #testGetNeighbors()
+    chars = [5, 9, 11]
+    people = range(1,10)
+    draw_graph_networks(chars, people)
+    # testMatch()
+    # testCrossover()
+    # testRemoveVertex()
+    # testFindPaths()
+    # testGetNeighbors()
 
 if __name__ == "__main__":
     main()
