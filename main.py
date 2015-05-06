@@ -461,17 +461,23 @@ def generate_crossovers(char_index_pool, person_index_pool):
                 # print "char is = ", char
                 # print "first graph is at index ", i, " is person ", person_index_pool[i], " in data "
                 # print "second graph is at index ", j, " is person ", person_index_pool[j], "in data "
-                graph1 = graphPool[char][person_index_pool[i]]
+                graph1 = graphPool[char][person_index_pool[i]-1]
+                print 'graph 1'
+                graph1.print_graph()
                 
                 try:
                     graph2 = graphPool[char][person_index_pool[j]-1]
+                    print 'graph 2'
+                    graph2.print_graph()
                 except IndexError:
                     print "Doing person at i = " + str(i) + " " + str(person_index_pool[i]) 
                     print "Doing person at j = " + str(j) + " " + str(person_index_pool[j]) 
                     print person_index_pool
                     print graphPool
                     graphPool[char].append()
-                new_graph = CrossOver(graph1, graph2, 7)
+                new_graph = CrossOver(graph1, graph2, 20)
+                print 'crossover graph'
+                new_graph.print_graph()
                 #new_graph.print_graph()
                 # save to file
                 save_graph_to_file(new_graph, graph_name= get_crossed_filename(person_index_pool[i], person_index_pool[j], char))
@@ -498,7 +504,7 @@ def append_crossovers(graphs, char_indices, person_indices):
 def test_gen_crossovers():
     # get graphs for each of the chars for each of the peresons in the pool
     chars = [11]
-    persons = range(1,10)
+    persons = range(1,5)
     generate_crossovers(chars, persons)
 
 def test_read_crossovers():
