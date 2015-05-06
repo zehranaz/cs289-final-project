@@ -285,6 +285,7 @@ def traverse(im, graph, nrow, ncol, currentrow, currentcol, r, imdup, prev_verte
 def fitness_between_nodes(g1, g2, threshold):
     matching_vertices = MatchPoints(g1, g2, threshold)
     # if insufficient number of points matched
+    print 'g1 num vertices = ', g1.numVertices(), 'and g2 num vertices = ', g2.numVertices()
     print 'number of matching nodes', len(matching_vertices), 'out of ', max(g1.numVertices(), g2.numVertices())
     # if len(matching_vertices) < min(g1.numVertices(), g2.numVertices()):
     #     print 'too few matches'

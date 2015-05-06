@@ -211,7 +211,7 @@ def MatchPoints(g1, g2, threshold):
                 if closestVertex == None or minDist > threshold:
                     ver1.remove(v1)
                     # print "THERE IS AN UNMATCHED VERTEX! ", v1.print_out()
-                if not closestVertex == None and minDist <= threshold:
+                elif closestVertex and minDist <= threshold:
                     matches.append((v1, closestVertex))
                     ver1.remove(v1)
                     # print "removed v1"

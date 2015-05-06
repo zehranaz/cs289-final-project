@@ -60,24 +60,3 @@ def thin_image(infile, outfile):
     _, bw2 = cv2.threshold(bw, 10, 255, cv2.THRESH_BINARY)
     bw2 = thinning(bw2)
     cv2.imwrite(outfile, bw2)
-
-'''
-if __name__ == "__main__":
-    char_index = 11
-    person_index = 2
-    filename = "lao_images/000" + str(person_index) + "_" + str(char_index) + ".bmp"
-    print filename
-    src = cv2.imread(filename)
-    if src == None:
-        sys.exit()
-    bw = cv2.cvtColor(src, cv2.cv.CV_BGR2GRAY)
-    _, bw2 = cv2.threshold(bw, 10, 255, cv2.THRESH_BINARY)
-    bw2 = thinning(bw2)
-    
-    cv2.imshow("src", bw)
-    cv2.waitKey(0)
-    cv2.imshow("thinning", bw2)
-    cv2.waitKey(0)
-    
-    cv2.imwrite("lao_images/000"+ str(person_index) + "_" + str(char_index) + "_thin.bmp", bw2)
-'''
