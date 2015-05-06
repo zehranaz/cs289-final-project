@@ -310,9 +310,10 @@ def fitness_between_nodes(g1, g2, threshold):
     
     # weigh the distance deviations 
     # using sigmoid function to return high weight unless over 20 matching--the lower the weight the better 
-    weighted = ( max_vertices / num_matching ) * (1+math.exp(max_vertices/2-num_matching)) 
-    print "weight=", weighted, ", sum_of_distances=", sum_of_distances, ", together=", weighted * sum_of_distances
-    return weighted * sum_of_distances
+    scale_factor = ( max_vertices / num_matching ) 
+    penalty = 1+10/(1+math.exp(num_matching - max_vertices/2)) 
+    print "SF=", scale_factor, ", sum=", sum_of_distances, ", penalty=", penalty, " final=", scale_factor * penalty * sum_of_distances
+    return scale_factor * penalty * sum_of_distances
 
 # Build Graph from image, save plot of graph to file, return graph
 def build_graph(im, fbasename):
@@ -380,19 +381,19 @@ def produce_graphs(char_indices, person_indices, jobtype):
 
 def main_victoria():
     # training set against which we classify
-    char_indices = [11, 12, 9, 5, 18] # 5, 18
+    char_indices = [11, 12, 9] # 5, 18
     person_indices = range(1, 10) # not zero-indexed
     
     # produce graphs for each character
     graphs = produce_graphs(char_indices, person_indices, "coords")
     
     # add crossovers to graphs matrix
-    generate_crossovers(char_indices, person_indices)
-    graphs = append_crossovers(graphs, char_indices, person_indices)
+    # generate_crossovers(char_indices, person_indices)
+    # graphs = append_crossovers(graphs, char_indices, person_indices)
 
     # evaluate fitness between one graph and all other graphs
     # characters to be classified
-    test_char_indices = [11, 12, 9, 5, 18] # 5, 18
+    test_char_indices = [11, 12, 9] # 5, 18
     test_person_indices = range(1, 10) # not zero-indexed
     correct_classifications = defaultdict(int)
 
@@ -460,17 +461,23 @@ def generate_crossovers(char_index_pool, person_index_pool):
                 # print "char is = ", char
                 # print "first graph is at index ", i, " is person ", person_index_pool[i], " in data "
                 # print "second graph is at index ", j, " is person ", person_index_pool[j], "in data "
-                graph1 = graphPool[char][person_index_pool[i]]
+                graph1 = graphPool[char][person_index_pool[i]-1]
+                print 'graph 1'
+                graph1.print_graph()
                 
                 try:
                     graph2 = graphPool[char][person_index_pool[j]-1]
+                    print 'graph 2'
+                    graph2.print_graph()
                 except IndexError:
                     print "Doing person at i = " + str(i) + " " + str(person_index_pool[i]) 
                     print "Doing person at j = " + str(j) + " " + str(person_index_pool[j]) 
                     print person_index_pool
                     print graphPool
                     graphPool[char].append()
-                new_graph = CrossOver(graph1, graph2, 7)
+                new_graph = CrossOver(graph1, graph2, 20)
+                print 'crossover graph'
+                new_graph.print_graph()
                 #new_graph.print_graph()
                 # save to file
                 save_graph_to_file(new_graph, graph_name= get_crossed_filename(person_index_pool[i], person_index_pool[j], char))
@@ -497,7 +504,7 @@ def append_crossovers(graphs, char_indices, person_indices):
 def test_gen_crossovers():
     # get graphs for each of the chars for each of the peresons in the pool
     chars = [11]
-    persons = range(1,10)
+    persons = range(1,5)
     generate_crossovers(chars, persons)
 
 def test_read_crossovers():
@@ -509,8 +516,8 @@ def test_read_crossovers():
             graph.print_graph()
 
 if __name__ == "__main__":
-    #main_victoria()
     test_gen_crossovers()
+    # main_victoria()
     #test_read_crossovers()
     #testCrossovers()
 

@@ -147,9 +147,9 @@ class Graph:
     # Takes a vertex and removes it.
     def removeVertex(self, vertex):
         vIndex = self.getIndexOfVertex(vertex)
-        #print "VINDEX = " + str(vIndex) + " and vertex = ",
-        #print vertex.print_out()
-        if vIndex:
+        print "VINDEX = " + str(vIndex) + " and vertex = ",
+        print vertex.print_out()
+        if not vIndex == None:
             self.adjmatrix = np.delete(self.adjmatrix, vIndex, 0)
             self.adjmatrix = np.delete(self.adjmatrix, vIndex, 1)
             self.vertexlst.remove(vertex)
@@ -182,7 +182,7 @@ class Graph:
     def print_graph (self):
         print "Graph"
         self.print_vertexlst()
-        self.print_adjmatrix()
+        # self.print_adjmatrix()
 
 
 # Given two graphs and threshold (float for the max dist acceptable between two matching points), find the corresponding points; return as list
@@ -292,8 +292,11 @@ def printList(lst):
 
 # Given graphs of letters, generates an "evolved" (averaged) graph
 def CrossOver(g1, g2, threshold=5):
+
+    print 'number of nodes', g1.numVertices(), g2.numVertices()
     # Generate edges
     paths1 = findAllPaths(g1)
+    print "number of paths", len(paths1)
     
     # Make a graph with only the matched edges (to help us find all paths only with those vertexes)
     newGraph = copy.deepcopy(g2)    # to be returned
@@ -305,6 +308,7 @@ def CrossOver(g1, g2, threshold=5):
     # Pull out matched vertexes in graph 2
     v2matches = []
     for v1,v2 in matches:
+        print v1.print_out(), 'to', v2.print_out()
         v2matches.append(v2)
     vertexes2 = newGraph.getVertexes()
 
@@ -315,14 +319,15 @@ def CrossOver(g1, g2, threshold=5):
             continue
         else:
             to_remove.append(v2) 
+
     for v in to_remove:
-        print "Before removing UNMATCHED vertex", v.print_out(), " from graph2_copy: "
         graph2_copy.removeVertex(v)
         print "After removing UNMATCHED vertex", v.print_out(), " from graph2_copy: "
         graph2_copy.print_vertexlst()
 
     # Find paths in the newGraph
     paths2 = findAllPaths(graph2_copy)
+    print "number of paths", len(paths2)
 
     # Replace paths in newGraph
     for p2 in paths2:
