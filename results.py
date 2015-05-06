@@ -3,8 +3,6 @@ import matplotlib.pyplot as plt
 
 # Use this file for pulling out results. 
 
-
-
 def generate_fitness_plot(specific_char, specific_person, char_indices, person_indices, threshold):
     
     # produce graphs for each character
