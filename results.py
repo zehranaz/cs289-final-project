@@ -1,11 +1,12 @@
-from main import produce_graphs, fitness_between_nodes, generate_crossovers_from_graphs
+from bmp_to_graphs import produce_graphs
+from classify import fitness_between_nodes
+from crossover import generate_crossovers_from_graphs
 import matplotlib.pyplot as plt
 
 # Use this file for pulling out results. 
 
-
-
 def generate_fitness_plot(specific_char, specific_person, char_indices, person_indices, threshold, doCrossover = False):
+
     
     # produce graphs for each character
     graphs = produce_graphs(char_indices, person_indices, "coords")
