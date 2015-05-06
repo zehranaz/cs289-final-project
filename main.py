@@ -207,7 +207,7 @@ def testCrossovers():
 def graph_readings_tests():
     #graph = makeSpecificGraph()
     #save_graph_to_file(graph, "test_graph")
-    graph = read_graph_from_file("test_graph.pkl")
+    graph = read_graph_from_file("pkl_files/test_graph.pkl")
     graph.print_graph()
 
 def main():
@@ -459,13 +459,13 @@ def main_victoria():
 
 # takes in a graph_name and writes out graph to graph_name.pkl
 def save_graph_to_file(graph, graph_name):
-    output = open(graph_name +".pkl", 'wb')
+    output = open("pkl_files/" + graph_name +".pkl", 'wb')
     pickle.dump(graph, output)
     output.close()
 
 # reads out graph from pickle file and returns it
 def read_graph_from_file(filename):
-    pkl_file = open(filename, 'rb')
+    pkl_file = open("pkl_files/" + filename, 'rb')
     graph = pickle.load(pkl_file)
     pkl_file.close()
     return graph

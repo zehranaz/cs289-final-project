@@ -5,3 +5,8 @@ lao_text*
 *.jpg
 *.gif
 *.pkl
+*.pdf
+*.log
+*.aux
+*.gz
+pkl_files*
