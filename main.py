@@ -418,7 +418,7 @@ def main_victoria():
     graphs = produce_graphs(char_indices, person_indices, "coords")
     
     # add crossovers to graphs matrix
-    generate_crossovers_from_graphs(char_indices, person_indices, graphs)
+    generate_crossovers_from_graphs(graphs, char_indices, person_indices)
 
     # evaluate fitness between one graph and all other graphs
     # characters to be classified
@@ -526,8 +526,9 @@ def generate_crossovers_from_graphs(graph_pool, char_index_pool, person_index_po
                             graph1 = graph_pool[char_row][person_index_pool[i]-1]
                             graph2 = graph_pool[char_row][person_index_pool[j]-1]
                             new_graph = CrossOver(graph1, graph2, threshold)
-                            save_graph_to_file(new_graph, graph_name= get_crossed_filename(person_index_pool[i], person_index_pool[j], char))
-                        except IndexError:
+                            save_graph_to_file(new_graph, graph_name= get_crossed_filename(person_index_pool[i], person_index_pool[j], char_row))
+                        #TODO: Remove this try exccept entirely. We should never be having this error, just succeeding with what's in the try...
+                        except IndexError: 
                             print i , j, char_row, person_index_pool[i], person_index_pool[j] 
                             print num_persons, person_index_pool
                 graph_pool[char_row].append(new_graph)
