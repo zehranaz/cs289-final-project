@@ -10,7 +10,6 @@ import os.path
 import copy
 import sys
 import math
-import copy
 import pickle
 
 def unit_vector(vector):
@@ -357,7 +356,8 @@ def build_graph(im, fbasename):
 # 3) build the graph from the thinned image
 def produce_graphs(char_indices, person_indices, jobtype):
     redo_thinning = False
-    graphs = defaultdict(list)
+    # nested dictionary indexed by character index then person index
+    graphs = defaultdict(lambda: defaultdict(list))
     for char_index in char_indices:
         for person_index in person_indices:
             if person_index < 10:
@@ -376,7 +376,7 @@ def produce_graphs(char_indices, person_indices, jobtype):
                 thinning.thin_image(infile, outfile)
             elif jobtype == "graph":
                 im = plt.imread(fbasename + "_thin.bmp")
-                graphs[char_index].append(build_graph(im, fbasename))
+                graphs[char_index][person_index] = build_graph(im, fbasename)
     if jobtype == "graph":
         return graphs
     elif redo_thinning:
@@ -384,39 +384,28 @@ def produce_graphs(char_indices, person_indices, jobtype):
     else:
         return produce_graphs(char_indices, person_indices, "graph")
 
-def main_victoria():
-    # training set against which we classify
-    char_indices = [11, 12, 9] # 5, 18
-    person_indices = range(1, 10) # not zero-indexed
-    
-    # produce graphs for each character
-    graphs = produce_graphs(char_indices, person_indices, "coords")
-    
-    # add crossovers to graphs matrix
-    generate_crossovers_from_graphs(graphs, char_indices, person_indices)
-
-    # evaluate fitness between one graph and all other graphs
-    # characters to be classified
-    test_char_indices = [11, 12, 9] # 5, 18
-    test_person_indices = range(1, 10) # not zero-indexed
+def all_to_all_classification(all_char_indices, all_person_indices, test_char_indices, test_person_indices, graph_pool, threshold=30):
     correct_classifications = defaultdict(int)
 
+    # evaluate fitness between one graph and all other graphs
     for test_char_index in test_char_indices:
         for test_person_index in test_person_indices:
-            test_graph = graphs[test_char_index][test_person_index-1]
+            test_graph = graph_pool[test_char_index][test_person_index]
             closest_char = None
             min_fitness_val = sys.maxint
+
             print 'classifying character', test_char_index, 'by person', test_person_index
             
-            # classify character test_char by test_person
-            for char_index in char_indices:
-                for person_index in person_indices:
-                    if not (char_index == test_char_index and person_index == test_person_index):
-                        g1 = test_graph
-                        g2 = graphs[char_index][person_index-1]
+            # compare to all graphs in the pool
+            for char_index in all_char_indices:
+                for person_index in all_person_indices:
+                    # make sure it's not compared to the original graph or a crossover from the original graph
+                    print 'before check', test_char_index, test_person_index, person_index
+                    if not (test_char_index == char_index and str(test_person_index) in str(person_index)):
+                        comparison_graph = graph_pool[char_index][person_index]
 
                         # find closest matching characters by minimizing fitness function
-                        fitness = fitness_between_nodes(g1, g2, 30)
+                        fitness = fitness_between_nodes(test_graph, comparison_graph, threshold)
                         if fitness < min_fitness_val:
                             min_fitness_val = fitness
                             closest_char = char_index
@@ -430,6 +419,40 @@ def main_victoria():
     print "Summary of correct classifications: "
     for char,num_correct in correct_classifications.items():
         print char, num_correct, num_correct / float(len(test_person_indices))
+
+
+def main_victoria():
+    # training set against which we classify
+    char_indices = [11, 12, 9] # 5, 18
+    person_indices = range(1, 10) # not zero-indexed
+    
+    # produce nested dictionary, access via graphs[char_ind][person_ind]
+    graphs = produce_graphs(char_indices, person_indices, "coords")
+
+    # add crossovers to graphs matrix
+    graph_pool = generate_crossovers_from_graphs(graphs, char_indices, person_indices)
+
+    ''' this check worked fine with 3 chars x 4 people graphs and crossovers
+    # sanity check: check all graphs exist that we expect to and # of vertices
+    for char in graph_pool:
+        for pind in graph_pool[char]:
+            print 'char', char, 'pind', pind, 'vertices', graphs[char][pind].numVertices()
+    '''
+    # characters to be classified - can be a subset of all_char_indices
+    test_char_indices = char_indices 
+    # characters to be compared against
+    all_char_indices = char_indices
+
+    # which people's handwriting of test_char_indices will be classified
+    test_person_indices = person_indices
+    # add the crossover indices to the pool of all_person_indices to be tested
+    all_person_indices = []
+    for char in graph_pool:
+        all_person_indices += graph_pool[char].keys()
+
+    all_to_all_classification(all_char_indices, all_person_indices, test_char_indices, test_person_indices, graph_pool)
+
+    return
 
 
 # takes in a graph_name and writes out graph to graph_name.pkl
@@ -487,26 +510,31 @@ def generate_crossovers(char_index_pool, person_index_pool):
 # given a dictionary of graphs indexed by character index and then person index, append crossedOver graphs 
 def generate_crossovers_from_graphs(graph_pool, char_index_pool, person_index_pool, threshold=20):
     num_persons = len(person_index_pool)
-    for char_row in graph_pool:
-        for i in range(num_persons-1):
-            for j in range(i+1, num_persons):
-                try:
-                    new_graph = read_graph_from_file(get_crossed_filename(i, j, char_row) + ".pkl")
+    for char in char_index_pool:
+        for i, person_i in enumerate(person_index_pool):
+            for j, person_j in enumerate(person_index_pool):
+                # only do crossover once between each possible pair
+                if j <= i:
+                    continue
+                # check if crossover has already been done and saved to file
+                try: 
+                    new_graph = read_graph_from_file(get_crossed_filename(i, j, char) + ".pkl")
                 except IOError:
                     try: 
-                       new_graph = read_graph_from_file(get_crossed_filename(j, i, char_row) + ".pkl") 
+                       new_graph = read_graph_from_file(get_crossed_filename(j, i, char) + ".pkl")
                     except IOError:
-                        # actually do crossover
+                        # actually do crossover if can't be loaded from file
                         try: 
-                            graph1 = graph_pool[char_row][person_index_pool[i]-1]
-                            graph2 = graph_pool[char_row][person_index_pool[j]-1]
+                            graph1 = graph_pool[char][person_i]
+                            graph2 = graph_pool[char][person_j]
                             new_graph = CrossOver(graph1, graph2, threshold)
-                            save_graph_to_file(new_graph, graph_name= get_crossed_filename(person_index_pool[i], person_index_pool[j], char_row))
-                        #TODO: Remove this try exccept entirely. We should never be having this error, just succeeding with what's in the try...
+                            save_graph_to_file(new_graph, graph_name = get_crossed_filename(person_i, person_j, char))
+                        #TODO: Remove this try except entirely. We should never be having this error, just succeeding with what's in the try...
                         except IndexError: 
-                            print i , j, char_row, person_index_pool[i], person_index_pool[j] 
+                            print "IndexError"
+                            print i , j, char_row, person_i, person_j 
                             print num_persons, person_index_pool
-                graph_pool[char_row].append(new_graph)
+                graph_pool[char][str(person_i) + "_" + str(person_j)] = new_graph
     return graph_pool
 
 # Given a char and person index, return name of file
