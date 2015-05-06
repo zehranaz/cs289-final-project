@@ -330,6 +330,18 @@ def CrossOver(g1, g2, threshold=5):
     paths2 = findAllPaths(graph2_copy)
     print "number of paths", len(paths2)
 
+    # just printing
+    print "paths1"
+    for p1 in paths1:
+        for v1 in p1:
+            print v1.print_out(), " ; ",
+        print ""
+    print "paths2"
+    for p2 in paths2:
+        for v2 in p2:
+            print v2.print_out(), " ; ",
+        print ""
+
     # Replace paths in newGraph
     for p2 in paths2:
         p1 = []
@@ -352,7 +364,9 @@ def CrossOver(g1, g2, threshold=5):
         # Find out whether p1 (or its reverse) exists in paths1
         if p1 in paths1 or p1.reverse() in paths1:
             # Replace common paths with 50% prob, based on how many common paths found
-            if random() < 0.5:
+            print "in p1"
+            if True: #random() < 1.:
+                print "REPLACING A PATH"
                 # edge for edge, add and delete
                 #TODO: Might have to change i and i+1 around to fit if reverse path is found.
                 for i in range(len(p2) - 1):
@@ -371,6 +385,7 @@ def CrossOver(g1, g2, threshold=5):
     for v2 in vertexes2:
         if v2 in v2matches:
             # Get index into matches and change vertex to average of two matched v's
+            print "AVERAGING VERTEX"
             v2Index = v2matches.index(v2)
             v2.changeVertex(matches[v2Index][0].avgVertex(v2))
 

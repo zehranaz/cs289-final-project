@@ -1,0 +1,36 @@
+\documentclass[tikz]{standalone}
+
+\newcommand{\graphfromadj}[3][arc/.try]{
+    \foreach [count=\r] \row in {#3}{
+        \foreach [count=\c] \cell in \row{
+            \ifnum\cell=1%
+                \draw[arc/.try=\cell, #1] (#2\r) edge (#2\c);
+            \fi
+        }
+    }
+}
+
+\newcommand{\weigthgraphfromadj}[3][draw,->]{
+    \foreach [count=\r] \row in {#3}{
+        \foreach [count=\c] \cell in \row{
+            \if0\cell%
+            \else
+                \draw[arc/.try=\cell, #1] (#2\r) edge node[arc label/.try=\cell]{\cell} (#2\c);
+            \fi
+        }
+    }
+}
+
+\begin{document}
+\begin{tikzpicture}[scale=5,
+    vertex/.style={draw,circle},
+    arc/.style={draw=blue!#10,thick,->},
+    arc label/.style={fill=white, font=\tiny, inner sep=1pt}
+    ]
+    \foreach [count=\i] \coord in {(2, 3), (0, 0), (4, 5), (10, 20)}{
+        \node[vertex] (p\i) at \coord {\i};
+    }
+
+    \weigthgraphfromadj[bend left=10]{p}{{0,1,1,0},{1,0,0,0},{1,0,0,1},{0,0,1,0}}
+\end{tikzpicture}
+\end{document}
