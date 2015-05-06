@@ -429,7 +429,6 @@ def all_to_all_classification(all_char_indices, all_person_indices, test_char_in
             for char_index in all_char_indices:
                 for person_index in all_person_indices:
                     # make sure it's not compared to the original graph or a crossover from the original graph
-                    print 'before check', test_char_index, test_person_index, person_index
                     if not (test_char_index == char_index and str(test_person_index) in str(person_index)):
                         comparison_graph = graph_pool[char_index][person_index]
 
@@ -452,7 +451,7 @@ def all_to_all_classification(all_char_indices, all_person_indices, test_char_in
 
 def main_victoria():
     # training set against which we classify
-    char_indices = [11, 12, 9] # 5, 18
+    char_indices = [11, 12, 9, 5, 18] # 5, 18
     person_indices = range(1, 10) # not zero-indexed
     
     # produce nested dictionary, access via graphs[char_ind][person_ind]
@@ -486,7 +485,7 @@ def main_victoria():
 
 # takes in a graph_name and writes out graph to graph_name.pkl
 def save_graph_to_file(graph, graph_name):
-    output = open( graph_name +".pkl", 'wb')
+    output = open(graph_name +".pkl", 'wb')
     pickle.dump(graph, output)
     output.close()
 

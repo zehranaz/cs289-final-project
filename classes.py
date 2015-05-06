@@ -308,7 +308,7 @@ def CrossOver(g1, g2, threshold=5):
     # Pull out matched vertexes in graph 2
     v2matches = []
     for v1,v2 in matches:
-        print v1.print_out(), 'to', v2.print_out()
+        # print v1.print_out(), 'to', v2.print_out()
         v2matches.append(v2)
     vertexes2 = newGraph.getVertexes()
 
@@ -343,6 +343,7 @@ def CrossOver(g1, g2, threshold=5):
         p1 = []
         for vertex2 in p2:
             # Find equivalent vertex1 thru matches
+            """ just printing
             if vertex2 not in v2matches:
                 print "VERTEX NOT IN V2MATCHES...HOW DID IT GET HERE... ", vertex2.print_out()
                 print "Matches are "
@@ -351,6 +352,7 @@ def CrossOver(g1, g2, threshold=5):
                 print "REAL matches list was: "
                 for w1, w2 in matches:
                     print w1.print_out(), w2.print_out()
+            """
             vertex1 = findVertexInMatches(vertex2, matches, v2matches)
             # Append to matchPaths 
             if vertex1 == None:
@@ -360,9 +362,9 @@ def CrossOver(g1, g2, threshold=5):
         # Find out whether p1 (or its reverse) exists in paths1
         if p1 in paths1 or p1.reverse() in paths1:
             # Replace common paths with 50% prob, based on how many common paths found
-            print "in p1"
+            # print "in p1"
             if True: #random() < 1.:
-                print "REPLACING A PATH"
+                # print "REPLACING A PATH"
                 # edge for edge, add and delete
                 #TODO: Might have to change i and i+1 around to fit if reverse path is found.
                 for i in range(len(p2) - 1):
@@ -381,7 +383,7 @@ def CrossOver(g1, g2, threshold=5):
     for v2 in vertexes2:
         if v2 in v2matches:
             # Get index into matches and change vertex to average of two matched v's
-            print "AVERAGING VERTEX"
+            # print "AVERAGING VERTEX"
             v2Index = v2matches.index(v2)
             v2.changeVertex(matches[v2Index][0].avgVertex(v2))
 
