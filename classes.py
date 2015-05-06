@@ -147,8 +147,8 @@ class Graph:
     # Takes a vertex and removes it.
     def removeVertex(self, vertex):
         vIndex = self.getIndexOfVertex(vertex)
-        print "VINDEX = " + str(vIndex) + " and vertex = ",
-        print vertex.print_out()
+        # print "VINDEX = " + str(vIndex) + " and vertex = ",
+        # print vertex.print_out()
         if not vIndex == None:
             self.adjmatrix = np.delete(self.adjmatrix, vIndex, 0)
             self.adjmatrix = np.delete(self.adjmatrix, vIndex, 1)
@@ -322,24 +322,21 @@ def CrossOver(g1, g2, threshold=5):
 
     for v in to_remove:
         graph2_copy.removeVertex(v)
-        print "After removing UNMATCHED vertex", v.print_out(), " from graph2_copy: "
-        graph2_copy.print_vertexlst()
 
     # Find paths in the newGraph
     paths2 = findAllPaths(graph2_copy)
-    print "number of paths", len(paths2)
-
+    
     # just printing
-    print "paths1"
-    for p1 in paths1:
-        for v1 in p1:
-            print v1.print_out(), " ; ",
-        print ""
-    print "paths2"
-    for p2 in paths2:
-        for v2 in p2:
-            print v2.print_out(), " ; ",
-        print ""
+    # print "paths1"
+    # for p1 in paths1:
+    #     for v1 in p1:
+    #         print v1.print_out(), " ; ",
+    #     print ""
+    # print "paths2"
+    # for p2 in paths2:
+    #     for v2 in p2:
+    #         print v2.print_out(), " ; ",
+    #     print ""
 
     # Replace paths in newGraph
     for p2 in paths2:

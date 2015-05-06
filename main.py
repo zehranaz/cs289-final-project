@@ -284,8 +284,10 @@ def traverse(im, graph, nrow, ncol, currentrow, currentcol, r, imdup, prev_verte
 def fitness_between_nodes(g1, g2, threshold):
     matching_vertices = MatchPoints(g1, g2, threshold)
     # if insufficient number of points matched
-    print 'g1 num vertices = ', g1.numVertices(), 'and g2 num vertices = ', g2.numVertices()
-    print 'number of matching nodes', len(matching_vertices), 'out of ', max(g1.numVertices(), g2.numVertices())
+    
+    #print 'g1 num vertices = ', g1.numVertices(), 'and g2 num vertices = ', g2.numVertices()
+    #print 'number of matching nodes', len(matching_vertices), 'out of ', max(g1.numVertices(), g2.numVertices())
+    
     # if len(matching_vertices) < min(g1.numVertices(), g2.numVertices()):
     #     print 'too few matches'
     #     threshold = max(2*threshold, sys.maxint)
@@ -311,7 +313,9 @@ def fitness_between_nodes(g1, g2, threshold):
     # using sigmoid function to return high weight unless over 20 matching--the lower the weight the better 
     scale_factor = ( max_vertices / num_matching ) 
     penalty = 1+10/(1+math.exp(num_matching - max_vertices/2)) 
-    print "SF=", scale_factor, ", sum=", sum_of_distances, ", penalty=", penalty, " final=", scale_factor * penalty * sum_of_distances
+    
+    # print "SF=", scale_factor, ", sum=", sum_of_distances, ", penalty=", penalty, " final=", scale_factor * penalty * sum_of_distances
+    
     return scale_factor * penalty * sum_of_distances
 
 def generate_fitness_plot(specific_char, specific_person, char_indices, person_indices, threshold):
@@ -482,7 +486,7 @@ def main_victoria():
 
 # takes in a graph_name and writes out graph to graph_name.pkl
 def save_graph_to_file(graph, graph_name):
-    output = open("pkl_files/" + graph_name +".pkl", 'wb')
+    output = open( graph_name +".pkl", 'wb')
     pickle.dump(graph, output)
     output.close()
 
