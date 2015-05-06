@@ -187,19 +187,22 @@ def testFindPaths():
 def testCrossover():
     g1 = makeTestGraph(35)
     print "g1 numvertices = ", len(g1.getVertexes())
-    g1.print_graph()
+    g1.print_vertexlst()
     g2 = makeTestGraph(25)
     print "g2 numvertices = ", len(g2.getVertexes())
-    g2.print_graph()
+    g2.print_vertexlst()
     # Since this makes the same graph, CrossOver should return same thing
     
     newGraph = CrossOver(g1, g2)
     print "New Graph = ", len(newGraph.getVertexes())
-    newGraph.print_graph()
+    newGraph.print_vertexlst()
     print "end New Graph"
 
-    print "Old Graph = "
-    g1.print_graph()
+# Extensive testing of CrossOver generation
+def testCrossovers():
+    for i in range(50):
+        print "This is test ", i
+        testCrossover()
 
 def graph_readings_tests():
     #graph = makeSpecificGraph()
@@ -460,10 +463,14 @@ def generate_crossovers(char_index_pool, person_index_pool):
                 # print "second graph is at index ", j, " is person ", person_index_pool[j], "in data "
                 graph1 = graphPool[char][person_index_pool[i]]
                 
-                # print "Doing person at i = " + str(i) + " " + str(person_index_pool[i]) 
-                # print "Doing person at j = " + str(j) + " " + str(person_index_pool[j]) 
-                # print person_index_pool
-                graph2 = graphPool[char][person_index_pool[j]]
+                try:
+                    graph2 = graphPool[char][person_index_pool[j]-1]
+                except IndexError:
+                    print "Doing person at i = " + str(i) + " " + str(person_index_pool[i]) 
+                    print "Doing person at j = " + str(j) + " " + str(person_index_pool[j]) 
+                    print person_index_pool
+                    print graphPool
+                    graphPool[char].append()
                 new_graph = CrossOver(graph1, graph2, 7)
                 #new_graph.print_graph()
                 # save to file
@@ -503,7 +510,8 @@ def test_read_crossovers():
             graph.print_graph()
 
 if __name__ == "__main__":
-    # main_victoria()
     test_gen_crossovers()
+    # main_victoria()
     #test_read_crossovers()
+    #testCrossovers()
 

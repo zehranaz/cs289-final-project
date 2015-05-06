@@ -146,8 +146,6 @@ class Graph:
 
     # Takes a vertex and removes it.
     def removeVertex(self, vertex):
-        #print "REMOVING VERTEX: ",
-        #print vertex
         vIndex = self.getIndexOfVertex(vertex)
         #print "VINDEX = " + str(vIndex) + " and vertex = ",
         #print vertex.print_out()
@@ -238,6 +236,7 @@ def findPathsWithoutLast(iVertex, jVertex, length, graph, path):
         jNeighbors = graph.getNeighborVertexes(jVertex)
         for k in jNeighbors:
             pathFound = findPathsWithoutLast(iVertex, k, length-1, graph, path)
+            # Do not add in k if already there
             if k in pathFound:
                 path = []
                 pathFound = []
@@ -279,21 +278,14 @@ def findAllPaths(graph, length_limit=4):
 # Helper for finding matching paths. Takes vertex from g2 and finds the 
 #  equivalent from g1 by using matches found
 def findVertexInMatches(vertex, matches, vertexes2):
-    index = vertexes2.index(vertex)
-    
-    v2matches = []
-    for v1, v2 in matches:
-        v2matches.append(v2)
-    if not vertex in v2matches:
-        print "VERTEX NOT FOUND"
-    
+    index = vertexes2.index(vertex)    
     (vert1, _) = matches[index]
     return vert1
 
 # Helpers for testing
 def printVertexList(lst):
     for item in lst:
-        print item.print_out()
+        print item.print_out(), " "
 def printList(lst):
     for item in lst:
         print item
@@ -304,38 +296,50 @@ def CrossOver(g1, g2, threshold=5):
     paths1 = findAllPaths(g1)
     
     # Make a graph with only the matched edges (to help us find all paths only with those vertexes)
-    newGraph = copy.deepcopy(g2)
+    newGraph = copy.deepcopy(g2)    # to be returned
+    graph2_copy = copy.deepcopy(g2) # for finding paths on matched vertexes
     
-    matches = MatchPoints(g1, newGraph, threshold)
+    matches = MatchPoints(g1, graph2_copy, threshold)
     print "number of matches: ", len(matches)
 
     # Pull out matched vertexes in graph 2
     v2matches = []
     for v1,v2 in matches:
         v2matches.append(v2)
-    vertexes2 = g2.getVertexes()
+    vertexes2 = newGraph.getVertexes()
 
-    # Remove vertexes not matched, update ones that were matched 
+    # Remove vertexes not matched
+    to_remove = []
     for v2 in vertexes2:
         if v2 in v2matches:
-            # Get index into matches and change vertex to average of two matched v's
-            v2Index = v2matches.index(v2)
-            v2.changeVertex(matches[v2Index][0].avgVertex(v2))
-            #print v2.print_out()
+            continue
         else:
-            #print "REMOVING A VERTEX"
-            newGraph.removeVertex(v2) 
-    
+            to_remove.append(v2) 
+    for v in to_remove:
+        graph2_copy.removeVertex(v)
+        print "After removing UNMATCHED vertex", v.print_out(), " from graph2_copy: "
+        graph2_copy.print_vertexlst()
+
     # Find paths in the newGraph
-    paths2 = findAllPaths(newGraph)
+    paths2 = findAllPaths(graph2_copy)
 
     # Replace paths in newGraph
     for p2 in paths2:
         p1 = []
         for vertex2 in p2:
             # Find equivalent vertex1 thru matches
+            if vertex2 not in v2matches:
+                print "VERTEX NOT IN V2MATCHES...HOW DID IT GET HERE... ", vertex2.print_out()
+                print "Matches are "
+                printVertexList(v2matches)
+
+                print "REAL matches list was: "
+                for w1, w2 in matches:
+                    print w1.print_out(), w2.print_out()
             vertex1 = findVertexInMatches(vertex2, matches, v2matches)
             # Append to matchPaths 
+            if vertex1 == None:
+                print "No Matching v1 found. THIS IS BAD. DEBUG this."
             p1.append(vertex1)
 
         # Find out whether p1 (or its reverse) exists in paths1
@@ -346,11 +350,22 @@ def CrossOver(g1, g2, threshold=5):
                 #TODO: Might have to change i and i+1 around to fit if reverse path is found.
                 for i in range(len(p2) - 1):
                     edge1 = g1.getEdge(p1[i], p1[i+1])
+                    #TODO: might want to figure out why there is no edge in this path
+                    if edge1:
+                        edge1.set_startv(p2[i])
+                        edge1.set_endv(p2[i+1])
+                        newGraph.addEdge(edge1)
+                    else:
+                        print "MISSING EDGE in path...this is weird"
 
-                    edge1.set_startv(p2[i])
-                    edge1.set_endv(p2[i+1])
-                    newGraph.addEdge(edge1)
         p1 = []
+
+    # update the matched vertexes in newGraph with their averages
+    for v2 in vertexes2:
+        if v2 in v2matches:
+            # Get index into matches and change vertex to average of two matched v's
+            v2Index = v2matches.index(v2)
+            v2.changeVertex(matches[v2Index][0].avgVertex(v2))
 
     return newGraph
 
