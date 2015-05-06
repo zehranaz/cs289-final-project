@@ -321,7 +321,6 @@ def CrossOver(g1, g2, threshold=5):
             to_remove.append(v2) 
 
     for v in to_remove:
-        print v.print_out()
         graph2_copy.removeVertex(v)
         print "After removing UNMATCHED vertex", v.print_out(), " from graph2_copy: "
         graph2_copy.print_vertexlst()
