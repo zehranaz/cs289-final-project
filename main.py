@@ -8,7 +8,7 @@ from crossover import generate_crossovers_from_graphs
 def main():
     # training set against which we classify
     char_indices = [11, 12, 9] # 5, 18
-    person_indices = range(1, 5) # not zero-indexed
+    person_indices = range(1, 10) # not zero-indexed
     
     # produce nested dictionary, access via graphs[char_ind][person_ind]
     graphs = produce_graphs(char_indices, person_indices, "coords")

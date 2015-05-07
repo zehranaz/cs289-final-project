@@ -26,12 +26,6 @@ def generate_fitness_plot(specific_char, specific_person, char_indices, person_i
                 # find closest matching characters by minimizing fitness function
                 fitness = fitness_between_nodes(g1, g2, threshold)
                 print "fitness of char ", specific_char, " against char = " + str(char_index) + " and person " + str(person_index), " is ", fitness
-                # SHOULD NEVER GET HERE
-                if fitness < 100 and char_index == 11:
-                	print "THIS IS THE culprit POINT CHAR=11 AND FITNESS = ", fitness
-                	raise IndexError
-                if fitness == 0:
-                	"Fitness IS ZERO"
                 fitnesses.append((char_index, fitness))
                 print person_index, char_index, fitness
     fzip = zip(*fitnesses)
@@ -39,9 +33,9 @@ def generate_fitness_plot(specific_char, specific_person, char_indices, person_i
 
 def make_fitness_plot(doCrossover=False):
 	c_chars = [int(sys.argv[1])]
-	c_person = 1
+	c_person = 2
 	char_list = [11, 12, 9]
-	person_list = range(1,5)
+	person_list = range(1,10)
 	threshold = 30
 
 	for char in c_chars:
@@ -67,10 +61,11 @@ def make_fitness_plot(doCrossover=False):
 		#plt.yscale("linear")
 		#plt.autoscalex_on(False)
 		plt.axis(xmin = min(char_list)-1, xmax = max(char_list) + 1, ymin=0, ymax=1000000)
-		plt.savefig("writeup/char_" + str(char)+ "_classification")
+		if (doCrossover):
+			plt.savefig("writeup/char_" + str(char)+ "_classification_person" + str(c_person))
+		else:
+			plt.savefig("writeup/char_" + str(char)+ "_classification_nocrossover_person" + str(c_person))
 		#plt.show()
-
-
 
 if __name__ == "__main__":
     make_fitness_plot(True)
